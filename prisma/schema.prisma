@@ -1,0 +1,202 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  CLIENT
+  VENDOR
+  ADMIN
+}
+
+enum SubscriptionTier {
+  STANDARD
+  PRO
+  MAX
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum EventCategory {
+  VENUE
+  ENTERTAINMENT
+  CATERING
+  PHOTO_VIDEO
+  DECOR
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  phone         String?
+  avatar        String?
+  role          UserRole  @default(CLIENT)
+  passwordHash  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  events          Event[]
+  bookings        Booking[]
+  reviews         Review[]
+  vendor          Vendor?
+  conversations   Conversation[]
+  sentMessages    Message[]
+}
+
+model Vendor {
+  id               String           @id @default(cuid())
+  userId           String           @unique
+  user             User             @relation(fields: [userId], references: [id])
+  businessName     String
+  description      String?
+  category         EventCategory
+  city             String
+  address          String?
+  website          String?
+  instagram        String?
+  tiktok           String?
+  photos           String[]
+  panoramaUrl      String?
+  priceFrom        Float?
+  priceTo          Float?
+  subscription     SubscriptionTier @default(STANDARD)
+  isVerified       Boolean          @default(false)
+  rating           Float            @default(0)
+  reviewsCount     Int              @default(0)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  services         Service[]
+  bookings         Booking[]
+  reviews          Review[]
+  availability     Availability[]
+  conversations    Conversation[]
+}
+
+model Service {
+  id          String        @id @default(cuid())
+  vendorId    String
+  vendor      Vendor        @relation(fields: [vendorId], references: [id])
+  name        String
+  description String?
+  price       Float
+  duration    Int?
+  category    EventCategory
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+
+  bookings    Booking[]
+}
+
+model Event {
+  id          String     @id @default(cuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+  title       String
+  date        DateTime
+  budget      Float
+  spent       Float      @default(0)
+  guestsCount Int        @default(0)
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  bookings    Booking[]
+  guests      Guest[]
+  timeline    Timeline[]
+}
+
+model Booking {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  vendorId    String
+  vendor      Vendor        @relation(fields: [vendorId], references: [id])
+  serviceId   String?
+  service     Service?      @relation(fields: [serviceId], references: [id])
+  eventId     String?
+  event       Event?        @relation(fields: [eventId], references: [id])
+  date        DateTime
+  status      BookingStatus @default(PENDING)
+  totalPrice  Float
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  vendorId  String
+  vendor    Vendor   @relation(fields: [vendorId], references: [id])
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+model Guest {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id])
+  name      String
+  email     String?
+  phone     String?
+  qrCode    String   @unique @default(cuid())
+  rsvp      String?
+  attended  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Timeline {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id])
+  title       String
+  description String?
+  dueDate     DateTime
+  isDone      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Availability {
+  id        String   @id @default(cuid())
+  vendorId  String
+  vendor    Vendor   @relation(fields: [vendorId], references: [id])
+  date      DateTime
+  isBooked  Boolean  @default(false)
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  vendorId  String
+  vendor    Vendor    @relation(fields: [vendorId], references: [id])
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([userId, vendorId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+  text           String
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+}
