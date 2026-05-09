@@ -1,100 +1,77 @@
 import Link from "next/link";
-import { Sparkles, Globe, ExternalLink } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-[var(--dark-border)] bg-[var(--dark-card)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="md:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-full bg-[var(--gold)] flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-black" />
-              </div>
-              <span className="text-white font-semibold text-lg">
-                Event<span className="text-[var(--gold)]">Sphere</span>
-              </span>
-            </Link>
-            <p className="text-[var(--text-muted)] text-sm leading-relaxed">
-              Від ранкової кави до весілля мрії — все в одному додатку.
-            </p>
-            <div className="flex gap-3 mt-4">
-              <a href="#" className="text-[var(--text-muted)] hover:text-[var(--gold)] transition-colors">
-                <Globe className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-[var(--text-muted)] hover:text-[var(--gold)] transition-colors">
-                <ExternalLink className="w-5 h-5" />
-              </a>
-            </div>
-          </div>
-
-          {/* Клієнтам */}
-          <div>
-            <h4 className="text-white text-sm font-semibold mb-4">Клієнтам</h4>
-            <ul className="space-y-2">
-              {[
-                { href: "/catalog", label: "Каталог послуг" },
-                { href: "/daily", label: "Бронювання на сьогодні" },
-                { href: "/planner", label: "AI-Планувальник" },
-                { href: "/how-it-works", label: "Як це працює" },
-              ].map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className="text-[var(--text-muted)] hover:text-white text-sm transition-colors">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Бізнесу */}
-          <div>
-            <h4 className="text-white text-sm font-semibold mb-4">Бізнесу</h4>
-            <ul className="space-y-2">
-              {[
-                { href: "/pro", label: "Pro-портфоліо" },
-                { href: "/pro/crm", label: "CRM-система" },
-                { href: "/pro/marketing", label: "Центр розвитку" },
-                { href: "/pro/pricing", label: "Тарифи" },
-              ].map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className="text-[var(--text-muted)] hover:text-white text-sm transition-colors">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Компанія */}
-          <div>
-            <h4 className="text-white text-sm font-semibold mb-4">Компанія</h4>
-            <ul className="space-y-2">
-              {[
-                { href: "/about", label: "Про нас" },
-                { href: "/blog", label: "Блог" },
-                { href: "/contacts", label: "Контакти" },
-                { href: "/privacy", label: "Конфіденційність" },
-              ].map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className="text-[var(--text-muted)] hover:text-white text-sm transition-colors">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+    <footer className="px-4 md:px-9 pt-20 pb-7 border-t border-[var(--line)] mt-16">
+      <div className="flex flex-wrap justify-between items-center gap-8 pb-14 mb-14 border-b border-[var(--line)]">
+        <h2
+          className="m-0 max-w-[16ch]"
+          style={{
+            fontFamily: "var(--display)",
+            fontSize: "clamp(40px, 5.5vw, 86px)",
+            fontWeight: 400,
+            lineHeight: 0.95,
+            letterSpacing: "-0.02em",
+          }}
+        >
+          Готовий <em>увімкнути</em> своє свято?
+        </h2>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/register" className="btn-pop">
+            <span>✨</span><span>Створити акаунт</span><span>→</span>
+          </Link>
+          <Link href="/pro" className="btn-line">Я виконавець</Link>
         </div>
+      </div>
 
-        <div className="border-t border-[var(--dark-border)] mt-10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-[var(--text-muted)] text-xs">
-            © 2025 EventSphere. Всі права захищено.
-          </p>
-          <p className="text-[var(--text-muted)] text-xs">
-            Безпечні платежі · Верифіковані виконавці · Гарантія якості
+      <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr_1fr_1fr] gap-12 pb-8 border-b border-[var(--line)]">
+        <div>
+          <Link href="/" className="inline-flex items-center gap-2.5">
+            <svg viewBox="0 0 32 32" width="22" height="22">
+              <defs>
+                <linearGradient id="footbmg" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stopColor="#FFC857" />
+                  <stop offset="1" stopColor="#FF3D80" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M16 2 L20 12 L30 13 L22 20 L25 30 L16 24 L7 30 L10 20 L2 13 L12 12 Z"
+                fill="url(#footbmg)"
+              />
+            </svg>
+            <span style={{ fontFamily: "var(--display)", fontSize: 22 }}>EventSphere</span>
+          </Link>
+          <p className="text-[var(--muted)] text-sm mt-4 max-w-[320px]">
+            Твій всесвіт свят. Один додаток, уся Україна.
           </p>
         </div>
+
+        <div>
+          <h5 className="text-[var(--gold)] mb-3.5" style={{ fontFamily: "var(--display)", fontSize: 18 }}>Клієнтам</h5>
+          <Link href="/catalog" className="block py-1 text-[var(--muted)] hover:text-[var(--ink)] text-sm transition-colors">Каталог</Link>
+          <Link href="/daily" className="block py-1 text-[var(--muted)] hover:text-[var(--ink)] text-sm transition-colors">Щодня</Link>
+          <Link href="/planner" className="block py-1 text-[var(--muted)] hover:text-[var(--ink)] text-sm transition-colors">Планувальник</Link>
+          <Link href="/smart-match" className="block py-1 text-[var(--muted)] hover:text-[var(--ink)] text-sm transition-colors">Smart Match</Link>
+        </div>
+
+        <div>
+          <h5 className="text-[var(--gold)] mb-3.5" style={{ fontFamily: "var(--display)", fontSize: 18 }}>Бізнесу</h5>
+          <Link href="/pro" className="block py-1 text-[var(--muted)] hover:text-[var(--ink)] text-sm transition-colors">Pro-портфоліо</Link>
+          <Link href="/pro" className="block py-1 text-[var(--muted)] hover:text-[var(--ink)] text-sm transition-colors">CRM</Link>
+          <Link href="/pro" className="block py-1 text-[var(--muted)] hover:text-[var(--ink)] text-sm transition-colors">Тарифи</Link>
+        </div>
+
+        <div>
+          <h5 className="text-[var(--gold)] mb-3.5" style={{ fontFamily: "var(--display)", fontSize: 18 }}>Контакт</h5>
+          <a href="mailto:hello@eventsphere.ua" className="block py-1 text-[var(--muted)] hover:text-[var(--ink)] text-sm transition-colors">hello@eventsphere.ua</a>
+          <a href="tel:+380440000000" className="block py-1 text-[var(--muted)] hover:text-[var(--ink)] text-sm transition-colors">+38 044 000 0000</a>
+          <a href="#" className="block py-1 text-[var(--muted)] hover:text-[var(--ink)] text-sm transition-colors">@eventsphere.ua</a>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap justify-between gap-4 pt-6">
+        <span className="mono">© 2026 EventSphere · made in Україна</span>
+        <span className="mono dim">v.8.0 — carnival edition</span>
       </div>
     </footer>
   );

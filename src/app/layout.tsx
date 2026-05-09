@@ -1,17 +1,34 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Manrope, Caprasimo, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Providers from "@/components/Providers";
 import PWAInstall from "@/components/PWAInstall";
 
-const inter = Inter({ subsets: ["latin", "cyrillic"] });
+const manrope = Manrope({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-manrope",
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const caprasimo = Caprasimo({
+  subsets: ["latin"],
+  variable: "--font-caprasimo",
+  weight: "400",
+  display: "swap",
+});
+
+const jetbrains = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains",
+  weight: ["400", "500"],
+});
 
 export const metadata: Metadata = {
-  title: "EventSphere — Від ранкової кави до весілля мрії",
+  title: "EventSphere — Хай святкують всі",
   description:
-    "Глобальна цифрова екосистема для планування заходів. Маркетплейс святкових послуг, сервіс щоденного бронювання та платформа для розвитку івент-бізнесу.",
+    "Платформа святкування 2026. Маркетплейс святкових послуг, AI Smart Match, конструктор події та жива мапа свят України.",
   keywords: "весілля, корпоратив, бронювання, організація заходів, EventSphere",
   appleWebApp: {
     capable: true,
@@ -22,7 +39,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0D0D0D",
+  themeColor: "#0D0420",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -32,8 +49,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="uk" className="h-full">
-      <body className={`${inter.className} min-h-full flex flex-col`}>
+    <html lang="uk" className={`${manrope.variable} ${caprasimo.variable} ${jetbrains.variable}`}>
+      <body className="min-h-full flex flex-col" style={{ fontFamily: "var(--body)" }}>
         <Providers>
           <Navbar />
           <main className="flex-1">{children}</main>
