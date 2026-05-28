@@ -116,30 +116,41 @@ export default function BookingPanel({ vendorId, priceFrom, priceTo, bookedDates
       return;
     }
 
-    setLoading(true);
-    setError("");
-
-    const res = await fetch("/api/payments/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        vendorId,
-        date: selectedDate,
-        notes,
-        eventType,
-        totalPrice: priceFrom,
-      }),
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      setError(data.error || "Помилка оплати");
-      setLoading(false);
+    if (!selectedDate) {
+      setError("Будь ласка, оберіть дату");
       return;
     }
 
-    const { url } = await res.json();
-    window.location.href = url;
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/payments/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vendorId,
+          date: selectedDate,
+          notes,
+          eventType,
+          totalPrice: priceFrom,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || "Помилка оплати");
+        setLoading(false);
+        return;
+      }
+
+      const { url } = await res.json();
+      window.location.href = url;
+    } catch (err) {
+      setError("Помилка під час обробки запиту");
+      setLoading(false);
+      console.error("Payment error:", err);
+    }
   }
 
   return (

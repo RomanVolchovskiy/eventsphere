@@ -15,25 +15,36 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
-    setLoading(true);
-
+    
     const form = e.currentTarget;
     const email = (form.elements.namedItem("email") as HTMLInputElement).value;
     const password = (form.elements.namedItem("password") as HTMLInputElement).value;
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    if (!email || !password) {
+      setError("Будь ласка, заповніть усі поля");
+      return;
+    }
 
-    setLoading(false);
+    setLoading(true);
 
-    if (result?.error) {
-      setError("Невірний email або пароль");
-    } else {
-      router.push("/dashboard");
-      router.refresh();
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Невірний email або пароль");
+      } else {
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch (err) {
+      setError("Помилка входу. Спробуйте ще раз");
+      console.error("Sign in error:", err);
+    } finally {
+      setLoading(false);
     }
   }
 

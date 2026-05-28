@@ -1,12 +1,20 @@
-// Server-safe festive elements: marquee frame, fireworks SVG, balloons
+// Carnival decorative primitives: marquee bulb frame, fireworks SVG, balloons, section head, ticker.
 
 export function MarqueeFrame({ children }: { children: React.ReactNode }) {
   return (
     <div className="marquee">
-      <div className="marquee-row top"><Bulbs n={26} /></div>
-      <div className="marquee-row bottom"><Bulbs n={26} /></div>
-      <div className="marquee-col left"><Bulbs n={10} vertical /></div>
-      <div className="marquee-col right"><Bulbs n={10} vertical /></div>
+      <div className="marquee-row top">
+        <Bulbs n={26} />
+      </div>
+      <div className="marquee-row bottom">
+        <Bulbs n={26} />
+      </div>
+      <div className="marquee-col left">
+        <Bulbs n={10} vertical />
+      </div>
+      <div className="marquee-col right">
+        <Bulbs n={10} vertical />
+      </div>
       <div className="marquee-corners">
         <span /><span /><span /><span />
       </div>
@@ -26,8 +34,18 @@ function Bulbs({ n, vertical = false }: { n: number; vertical?: boolean }) {
 }
 
 export function Firework({
-  x, y, hue, delay = 0, size = 60,
-}: { x: number; y: number; hue: string; delay?: number; size?: number }) {
+  x,
+  y,
+  hue,
+  delay = 0,
+  size = 60,
+}: {
+  x: number;
+  y: number;
+  hue: string;
+  delay?: number;
+  size?: number;
+}) {
   const rays = 12;
   return (
     <svg
@@ -39,7 +57,18 @@ export function Firework({
         const a = (i / rays) * Math.PI * 2;
         const x2 = Math.cos(a) * 40;
         const y2 = Math.sin(a) * 40;
-        return <line key={i} x1="0" y1="0" x2={x2} y2={y2} stroke={hue} strokeWidth="2" strokeLinecap="round" />;
+        return (
+          <line
+            key={i}
+            x1="0"
+            y1="0"
+            x2={x2}
+            y2={y2}
+            stroke={hue}
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        );
       })}
       {Array.from({ length: rays }).map((_, i) => {
         const a = (i / rays) * Math.PI * 2;
@@ -52,8 +81,16 @@ export function Firework({
 }
 
 export function Balloon({
-  color, x, delay = 0, size = 70,
-}: { color: string; x: number; delay?: number; size?: number }) {
+  color,
+  x,
+  delay = 0,
+  size = 70,
+}: {
+  color: string;
+  x: number;
+  delay?: number;
+  size?: number;
+}) {
   return (
     <div
       className="balloon"
@@ -63,15 +100,28 @@ export function Balloon({
         <ellipse cx="30" cy="36" rx="28" ry="34" fill={color} />
         <ellipse cx="22" cy="26" rx="6" ry="10" fill="rgba(255,255,255,0.4)" />
         <polygon points="26,68 34,68 30,76" fill={color} />
-        <path d="M30 76 Q26 82 32 88 Q28 92 30 100" stroke="rgba(255,255,255,0.5)" strokeWidth="1" fill="none" />
+        <path
+          d="M30 76 Q26 82 32 88 Q28 92 30 100"
+          stroke="rgba(255,255,255,0.5)"
+          strokeWidth="1"
+          fill="none"
+        />
       </svg>
     </div>
   );
 }
 
 export function SectionHead({
-  n, kicker, title, sub,
-}: { n: string; kicker: string; title: React.ReactNode; sub?: string }) {
+  n,
+  kicker,
+  title,
+  sub,
+}: {
+  n: string;
+  kicker: string;
+  title: React.ReactNode;
+  sub?: string;
+}) {
   return (
     <div className="sh">
       <div className="sh-kicker mono">
@@ -100,11 +150,14 @@ export function Ticker() {
   const items = [...TICKER_LINES, ...TICKER_LINES, ...TICKER_LINES];
   return (
     <div className="ticker">
-      <span className="ticker-tag"><i className="dot" /> LIVE</span>
+      <span className="ticker-tag">
+        <i className="dot" /> LIVE
+      </span>
       <div className="ticker-track">
         {items.map((s, i) => (
           <span key={i} className="ticker-item">
-            {s}<i className="sep">✦</i>
+            {s}
+            <i className="sep">✦</i>
           </span>
         ))}
       </div>
