@@ -13,19 +13,50 @@ const links = [
   { href: "/pro", label: "Pro" },
 ];
 
-function BrandMark({ size = 28 }: { size?: number }) {
+function BrandMark({ size = 52 }: { size?: number }) {
   return (
     <span className="bm">
-      <svg viewBox="0 0 32 32" width={size} height={size}>
+      <svg viewBox="0 0 40 44" width={size} height={(size * 44) / 40} aria-hidden>
         <defs>
-          <linearGradient id="bmg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#FFC857" />
-            <stop offset="1" stopColor="#FF3D80" />
+          <linearGradient id="navGold" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#F0D080" />
+            <stop offset="45%" stopColor="#C9A24C" />
+            <stop offset="100%" stopColor="#8C6E2F" />
           </linearGradient>
         </defs>
+
+        {/* Star above crown */}
         <path
-          d="M16 2 L20 12 L30 13 L22 20 L25 30 L16 24 L7 30 L10 20 L2 13 L12 12 Z"
-          fill="url(#bmg)"
+          d="M20 1 L20.6 3 L22.5 3.6 L20.6 4.2 L20 6.2 L19.4 4.2 L17.5 3.6 L19.4 3 Z"
+          fill="url(#navGold)"
+        />
+
+        {/* Crown */}
+        <path
+          d="M11 14 L12.5 8 L16 11.5 L20 6.5 L24 11.5 L27.5 8 L29 14 Z"
+          fill="url(#navGold)"
+        />
+        <circle cx="12.5" cy="8" r="1.1" fill="url(#navGold)" />
+        <circle cx="27.5" cy="8" r="1.1" fill="url(#navGold)" />
+
+        {/* Letter Є */}
+        <text
+          x="20" y="30"
+          textAnchor="middle"
+          fontFamily="var(--font-fraunces), Fraunces, Georgia, serif"
+          fontSize="22"
+          fontStyle="italic"
+          fontWeight="500"
+          fill="url(#navGold)"
+        >
+          Є
+        </text>
+
+        {/* Ribbon flourish below */}
+        <path
+          d="M9 38 Q14 33 20 37 Q26 41 31 38 Q26 35 20 39 Q14 43 9 38 Z"
+          fill="url(#navGold)"
+          opacity="0.95"
         />
       </svg>
     </span>
@@ -49,7 +80,9 @@ export default function Navbar() {
     <header className={`nav ${scrolled ? "is-scrolled" : ""}`}>
       <Link href="/" className="brand">
         <BrandMark />
-        <span className="bn">EventSphere</span>
+        <span className="bn">
+          <span className="bn-gold">Є</span>Свято
+        </span>
       </Link>
 
       <nav className="nav-links hidden md:flex">
@@ -71,30 +104,33 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[13px]"
+                className="flex items-center gap-2 px-3 py-1.5 text-[11px]"
                 style={{
-                  background: "rgba(255,245,230,0.04)",
+                  background: "transparent",
                   border: "1px solid var(--line-2)",
-                  color: "var(--ink)",
+                  color: "var(--bone)",
+                  fontFamily: "var(--mono)",
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
                 }}
               >
                 <span
-                  className="w-5 h-5 rounded-full grid place-items-center"
-                  style={{ background: "linear-gradient(135deg, var(--gold), var(--magenta))" }}
+                  className="w-4 h-4 grid place-items-center"
+                  style={{ background: "var(--crimson)" }}
                 >
-                  <User className="w-3 h-3" strokeWidth={2} color="#1B0A36" />
+                  <User className="w-2.5 h-2.5" strokeWidth={2} color="#F5F1EA" />
                 </span>
                 <span>{session.user.name?.split(" ")[0] || "Я"}</span>
               </button>
               {userMenuOpen && (
                 <div
-                  className="absolute right-0 top-11 py-2 min-w-[200px]"
+                  className="absolute right-0 top-11 py-2 min-w-[220px]"
                   style={{
-                    background: "rgba(27, 10, 54, 0.95)",
+                    background: "rgba(19, 19, 22, 0.96)",
                     border: "1px solid var(--line-2)",
-                    borderRadius: 12,
+                    borderRadius: 0,
                     backdropFilter: "blur(18px)",
-                    boxShadow: "0 18px 50px -10px rgba(0,0,0,0.6)",
+                    boxShadow: "0 18px 50px -10px rgba(0,0,0,0.8)",
                   }}
                 >
                   <Link
@@ -129,9 +165,9 @@ export default function Navbar() {
             <Link href="/login" className="nav-link">
               увійти
             </Link>
-            <Link href="/register" className="btn-pop sm">
+            <Link href="/register" className="btn-elegant sm">
               <span>Створити</span>
-              <span className="bp-arrow">→</span>
+              <span className="arr">→</span>
             </Link>
           </>
         )}
@@ -190,9 +226,9 @@ export default function Navbar() {
                   <Link href="/login" onClick={() => setOpen(false)} className="text-[var(--muted)] py-2 text-sm">
                     Увійти
                   </Link>
-                  <Link href="/register" onClick={() => setOpen(false)} className="btn-pop sm inline-flex w-fit">
+                  <Link href="/register" onClick={() => setOpen(false)} className="btn-elegant sm inline-flex w-fit">
                     <span>Створити</span>
-                    <span className="bp-arrow">→</span>
+                    <span className="arr">→</span>
                   </Link>
                 </>
               )}

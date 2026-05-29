@@ -30,7 +30,7 @@ export default async function PaymentSuccessPage({
         title: `Захід: ${booking.vendor.businessName}`,
         date: booking.date,
         location: booking.vendor.city,
-        description: `Бронювання EventSphere · ID: ${searchParams.bookingId}`,
+        description: `Бронювання ЄСвято · ID: ${searchParams.bookingId}`,
       })
     : null;
 

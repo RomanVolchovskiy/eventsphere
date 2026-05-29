@@ -65,7 +65,7 @@ export default function PWAInstall() {
             <Smartphone className="w-5 h-5 text-[var(--gold)]" />
           </div>
           <div>
-            <p className="text-white font-medium text-sm mb-1">Встановити EventSphere</p>
+            <p className="text-white font-medium text-sm mb-1">Встановити ЄСвято</p>
             <p className="text-[var(--text-muted)] text-xs leading-relaxed">
               Швидкий доступ з робочого столу телефону, без браузера
             </p>

@@ -55,8 +55,8 @@ export function Firework({
     >
       {Array.from({ length: rays }).map((_, i) => {
         const a = (i / rays) * Math.PI * 2;
-        const x2 = Math.cos(a) * 40;
-        const y2 = Math.sin(a) * 40;
+        const x2 = (Math.cos(a) * 40).toFixed(3);
+        const y2 = (Math.sin(a) * 40).toFixed(3);
         return (
           <line
             key={i}
@@ -72,9 +72,9 @@ export function Firework({
       })}
       {Array.from({ length: rays }).map((_, i) => {
         const a = (i / rays) * Math.PI * 2;
-        const x2 = Math.cos(a) * 38;
-        const y2 = Math.sin(a) * 38;
-        return <circle key={i} cx={x2} cy={y2} r="3" fill={hue} />;
+        const cx = (Math.cos(a) * 38).toFixed(3);
+        const cy = (Math.sin(a) * 38).toFixed(3);
+        return <circle key={i} cx={cx} cy={cy} r="3" fill={hue} />;
       })}
     </svg>
   );

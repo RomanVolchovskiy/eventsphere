@@ -161,7 +161,7 @@ export default function ProPage() {
               </h2>
               <p className="text-[var(--text-muted)] mb-6 leading-relaxed">
                 Pro-профіль замінює окремий сайт. Панорамні фото 360°, відгуки, календар
-                зайнятості, прайс і контакти — все в одному місці, з трафіком EventSphere.
+                зайнятості, прайс і контакти — все в одному місці, з трафіком ЄСвято.
               </p>
               <ul className="space-y-3">
                 {[

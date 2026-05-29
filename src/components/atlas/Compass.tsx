@@ -124,7 +124,7 @@ export default function Compass() {
 
           <div className="compass-hub">
             <div className="hub-glyph">✦</div>
-            <div className="hub-name italic">EventSphere</div>
+            <div className="hub-name italic">ЄСвято</div>
             <div className="hub-hint mono">Натисніть на сегмент</div>
           </div>
         </div>
