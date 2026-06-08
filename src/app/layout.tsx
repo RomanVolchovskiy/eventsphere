@@ -1,37 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Caprasimo, JetBrains_Mono, Fraunces } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Providers from "@/components/Providers";
 import PWAInstall from "@/components/PWAInstall";
-
-const manrope = Manrope({
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-manrope",
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const caprasimo = Caprasimo({
-  subsets: ["latin"],
-  variable: "--font-caprasimo",
-  weight: "400",
-  display: "swap",
-});
-
-const jetbrains = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains",
-  weight: ["400", "500"],
-});
-
-const fraunces = Fraunces({
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-fraunces",
-  weight: "variable",
-  axes: ["opsz", "SOFT"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "ЄСвято — Хай святкують всі",
@@ -57,8 +29,16 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="uk" className={`${manrope.variable} ${caprasimo.variable} ${jetbrains.variable} ${fraunces.variable}`}>
-      <body className="min-h-full flex flex-col" style={{ fontFamily: "var(--body)" }}>
+    <html lang="uk">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Fraunces:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="min-h-full flex flex-col">
         <Providers>
           <Navbar />
           <main className="flex-1">{children}</main>

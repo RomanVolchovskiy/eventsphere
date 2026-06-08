@@ -1,0 +1,14 @@
+# Query: nextauth_
+# ContextLines: 1
+
+2 results - 2 files
+
+eventsphere\src\app\api\payments\checkout\route.ts:
+  38  
+  39:   const baseUrl = process.env.NEXTAUTH_URL ?? "eventsphere-7rkv3j4hw-rpmans-projects.vercel.app";
+  40  
+
+eventsphere\src\lib\auth.ts:
+  116    },
+  117:   secret: process.env.NEXTAUTH_SECRET,
+  118  };

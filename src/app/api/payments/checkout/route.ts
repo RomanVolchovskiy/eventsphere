@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const baseUrl = process.env.NEXTAUTH_URL ?? "eventsphere-7rkv3j4hw-rpmans-projects.vercel.app";
 
   // Create Stripe Checkout session
   const checkoutSession = await stripe.checkout.sessions.create({
