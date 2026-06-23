@@ -5,14 +5,15 @@ import { getDb } from "@/lib/db";
 export default async function PaymentCancelPage({
   searchParams,
 }: {
-  searchParams: { bookingId?: string };
+  searchParams: Promise<{ bookingId?: string }>;
 }) {
+  const params = await searchParams;
   // Cancel the booking if payment was cancelled
-  if (searchParams.bookingId) {
+  if (params.bookingId) {
     try {
       const db = getDb();
       await db.booking.update({
-        where: { id: searchParams.bookingId },
+        where: { id: params.bookingId },
         data: { status: "CANCELLED" },
       });
     } catch {

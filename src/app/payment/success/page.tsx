@@ -6,16 +6,17 @@ import { addToGoogleCalendarUrl } from "@/lib/google-calendar";
 export default async function PaymentSuccessPage({
   searchParams,
 }: {
-  searchParams: { bookingId?: string; session_id?: string; free?: string };
+  searchParams: Promise<{ bookingId?: string; session_id?: string; free?: string }>;
 }) {
-  const isFree = searchParams.free === "1";
+  const params = await searchParams;
+  const isFree = params.free === "1";
   let booking: { date: Date; vendor: { businessName: string; city: string } } | null = null;
 
-  if (searchParams.bookingId) {
+  if (params.bookingId) {
     try {
       const db = getDb();
       booking = await db.booking.findUnique({
-        where: { id: searchParams.bookingId },
+        where: { id: params.bookingId },
         select: {
           date: true,
           vendor: { select: { businessName: true, city: true } },
@@ -31,7 +32,7 @@ export default async function PaymentSuccessPage({
         title: `Захід: ${booking.vendor.businessName}`,
         date: booking.date,
         location: booking.vendor.city,
-        description: `Бронювання ЄСвято · ID: ${searchParams.bookingId}`,
+        description: `Бронювання ЄСвято · ID: ${params.bookingId}`,
       })
     : null;
 
@@ -75,7 +76,7 @@ export default async function PaymentSuccessPage({
                 </p>
               </div>
               <p className="text-[var(--text-muted)] text-xs font-mono mt-0.5">
-                #{searchParams.bookingId?.slice(-8)}
+                #{params.bookingId?.slice(-8)}
               </p>
             </div>
           </div>
