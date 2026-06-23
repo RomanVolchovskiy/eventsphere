@@ -3,11 +3,27 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
+import { rateLimit, getClientIp } from "@/lib/ratelimit";
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "Необхідна авторизація" }, { status: 401 });
+  }
+
+  // Rate limit: 10 checkout attempts per user per hour
+  const rl = rateLimit(`checkout:${session.user.id}`, 10, 60 * 60 * 1000);
+
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: "Забагато спроб оплати. Спробуйте через годину." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
+        },
+      }
+    );
   }
 
   const body = await request.json();
@@ -36,7 +52,10 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? "eventsphere-7rkv3j4hw-rpmans-projects.vercel.app";
+  // Always derive baseUrl from env — never hardcode
+  const baseUrl =
+    process.env.NEXTAUTH_URL ??
+    `https://${request.headers.get("host")}`;
 
   // Create Stripe Checkout session
   const checkoutSession = await stripe.checkout.sessions.create({
@@ -50,7 +69,11 @@ export async function POST(request: NextRequest) {
             name: `Бронювання: ${vendor.businessName}`,
             description: [
               eventType,
-              new Date(date).toLocaleDateString("uk-UA", { day: "numeric", month: "long", year: "numeric" }),
+              new Date(date).toLocaleDateString("uk-UA", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              }),
             ]
               .filter(Boolean)
               .join(" · "),

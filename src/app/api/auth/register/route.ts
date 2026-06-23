@@ -1,8 +1,27 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { getDb } from "@/lib/db";
+import { rateLimit, getClientIp } from "@/lib/ratelimit";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  // Rate limit: 5 registrations per IP per 15 minutes
+  const ip = getClientIp(req);
+  const rl = rateLimit(`register:${ip}`, 5, 15 * 60 * 1000);
+
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: "Забагато спроб. Спробуйте через 15 хвилин." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
+          "X-RateLimit-Limit": "5",
+          "X-RateLimit-Remaining": "0",
+        },
+      }
+    );
+  }
+
   const body = await req.json();
   const { name, email, password, role, phone, businessName } = body;
 

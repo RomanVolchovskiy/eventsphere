@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
+import { rateLimit } from "./ratelimit";
 
 declare module "next-auth" {
   interface User {
@@ -55,6 +56,17 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
+        // Rate limit: 10 login attempts per email per 15 minutes
+        const rl = rateLimit(
+          `login:${credentials.email.toLowerCase()}`,
+          10,
+          15 * 60 * 1000
+        );
+
+        if (!rl.success) {
+          throw new Error("Забагато спроб входу. Спробуйте через 15 хвилин.");
+        }
+
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { getDb } = require("./db");
         const db = getDb();
@@ -65,10 +77,18 @@ export const authOptions: NextAuthOptions = {
 
         if (!user?.passwordHash) return null;
 
-        const valid = await bcrypt.compare(credentials.password, user.passwordHash);
+        const valid = await bcrypt.compare(
+          credentials.password,
+          user.passwordHash
+        );
         if (!valid) return null;
 
-        return { id: user.id, email: user.email, name: user.name, role: user.role };
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        };
       },
     }),
   ],
@@ -79,7 +99,6 @@ export const authOptions: NextAuthOptions = {
         token.googleAccessToken = account.access_token;
         token.googleRefreshToken = account.refresh_token;
 
-        // Create or find user in DB
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { getDb } = require("./db");
         const db = getDb();
