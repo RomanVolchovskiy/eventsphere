@@ -38,13 +38,11 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      // Лише базові несенситивні scope — вхід працює без верифікації застосунку в Google.
+      // Доступ до Google Calendar (calendar.events) запитувати інкрементально пізніше,
+      // коли OAuth consent screen пройде верифікацію.
       authorization: {
-        params: {
-          scope:
-            "openid email profile https://www.googleapis.com/auth/calendar.events",
-          access_type: "offline",
-          prompt: "consent",
-        },
+        params: { scope: "openid email profile" },
       },
     }),
     CredentialsProvider({
