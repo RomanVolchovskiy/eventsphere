@@ -6,8 +6,9 @@ import { addToGoogleCalendarUrl } from "@/lib/google-calendar";
 export default async function PaymentSuccessPage({
   searchParams,
 }: {
-  searchParams: { bookingId?: string; session_id?: string };
+  searchParams: { bookingId?: string; session_id?: string; free?: string };
 }) {
+  const isFree = searchParams.free === "1";
   let booking: { date: Date; vendor: { businessName: string; city: string } } | null = null;
 
   if (searchParams.bookingId) {
@@ -41,14 +42,25 @@ export default async function PaymentSuccessPage({
           <CheckCircle2 className="w-10 h-10 text-green-400" />
         </div>
 
-        <h1 className="text-2xl font-bold text-white mb-3">Оплату отримано!</h1>
-        <p className="text-[var(--text-muted)] mb-2">
-          Кошти надійно заброньовані в системі Escrow.
-        </p>
-        <p className="text-[var(--text-muted)] text-sm mb-8">
-          Виконавець отримає підтвердження і зв&apos;яжеться з вами найближчим часом.
-          Кошти перейдуть виконавцю після підтвердження якості послуги.
-        </p>
+        <h1 className="text-2xl font-bold text-white mb-3">
+          {isFree ? "Бронювання підтверджено!" : "Оплату отримано!"}
+        </h1>
+        {isFree ? (
+          <p className="text-[var(--text-muted)] text-sm mb-8">
+            Заявку надіслано виконавцю. Він зв&apos;яжеться з вами найближчим часом,
+            щоб узгодити деталі та оплату. Передоплата зараз не потрібна.
+          </p>
+        ) : (
+          <>
+            <p className="text-[var(--text-muted)] mb-2">
+              Кошти надійно заброньовані в системі Escrow.
+            </p>
+            <p className="text-[var(--text-muted)] text-sm mb-8">
+              Виконавець отримає підтвердження і зв&apos;яжеться з вами найближчим часом.
+              Кошти перейдуть виконавцю після підтвердження якості послуги.
+            </p>
+          </>
+        )}
 
         {booking && (
           <div className="bg-[var(--dark-card)] border border-[var(--dark-border)] rounded-xl p-4 mb-6 text-left">

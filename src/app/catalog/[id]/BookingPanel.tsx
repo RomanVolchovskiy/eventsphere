@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, Users, MessageSquare, Shield, ArrowRight, CreditCard, Loader2 } from "lucide-react";
+import { Calendar, Users, MessageSquare, Shield, ArrowRight, CreditCard, Check, Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -109,6 +109,8 @@ export default function BookingPanel({ vendorId, priceFrom, priceTo, bookedDates
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const paymentsEnabled = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "true";
 
   async function handlePayment() {
     if (!session) {
@@ -231,10 +233,17 @@ export default function BookingPanel({ vendorId, priceFrom, priceTo, bookedDates
         {/* Trust */}
         <div className="border-t border-[var(--dark-border)] pt-4 flex items-start gap-3">
           <Shield className="w-4 h-4 text-[var(--gold)] flex-shrink-0 mt-0.5" />
-          <p className="text-[var(--text-muted)] text-xs leading-relaxed">
-            <span className="text-white">Безпечна угода (Escrow).</span> Кошти переходять
-            виконавцю лише після підтвердження якості послуги.
-          </p>
+          {paymentsEnabled ? (
+            <p className="text-[var(--text-muted)] text-xs leading-relaxed">
+              <span className="text-white">Безпечна угода (Escrow).</span> Кошти переходять
+              виконавцю лише після підтвердження якості послуги.
+            </p>
+          ) : (
+            <p className="text-[var(--text-muted)] text-xs leading-relaxed">
+              <span className="text-white">Заявка без передоплати.</span> Виконавець
+              зв&apos;яжеться з вами, щоб узгодити деталі та спосіб оплати.
+            </p>
+          )}
         </div>
       </div>
 
@@ -284,7 +293,7 @@ export default function BookingPanel({ vendorId, priceFrom, priceTo, bookedDates
                   <span className="text-white">{priceFrom.toLocaleString("uk")} ₴</span>
                 </div>
                 <div className="flex justify-between text-sm border-t border-[var(--dark-border)] pt-2 mt-2">
-                  <span className="text-white font-medium">До сплати</span>
+                  <span className="text-white font-medium">{paymentsEnabled ? "До сплати" : "Орієнтовна вартість"}</span>
                   <span className="text-[var(--gold)] font-bold">{priceFrom.toLocaleString("uk")} ₴</span>
                 </div>
               </div>
@@ -305,8 +314,10 @@ export default function BookingPanel({ vendorId, priceFrom, priceTo, bookedDates
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
+                ) : paymentsEnabled ? (
                   <><CreditCard className="w-4 h-4" /> Оплатити</>
+                ) : (
+                  <><Check className="w-4 h-4" /> Підтвердити бронювання</>
                 )}
               </button>
             </div>

@@ -40,7 +40,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Виконавця не знайдено" }, { status: 404 });
   }
 
-  // Create booking first (PENDING)
+  // Free-access mode (default). Поки платежі недоступні (Stripe не працює в Україні),
+  // бронювання підтверджується одразу без оплати. Щоб увімкнути платний checkout —
+  // виставити NEXT_PUBLIC_PAYMENTS_ENABLED=true у Vercel.
+  const paymentsEnabled = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "true";
+
+  // Create booking — CONFIRMED одразу у вільному режимі, PENDING коли платежі ввімкнені
   const booking = await db.booking.create({
     data: {
       userId: session.user.id,
@@ -48,7 +53,7 @@ export async function POST(request: NextRequest) {
       date: new Date(date),
       notes: notes || null,
       totalPrice: Number(totalPrice),
-      status: "PENDING",
+      status: paymentsEnabled ? "PENDING" : "CONFIRMED",
     },
   });
 
@@ -56,6 +61,13 @@ export async function POST(request: NextRequest) {
   const baseUrl =
     process.env.NEXTAUTH_URL ??
     `https://${request.headers.get("host")}`;
+
+  if (!paymentsEnabled) {
+    return NextResponse.json({
+      url: `${baseUrl}/payment/success?bookingId=${booking.id}&free=1`,
+      bookingId: booking.id,
+    });
+  }
 
   // Create Stripe Checkout session
   const checkoutSession = await stripe.checkout.sessions.create({
