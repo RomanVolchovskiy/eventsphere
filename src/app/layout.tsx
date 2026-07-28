@@ -1,5 +1,36 @@
 import type { Metadata, Viewport } from "next";
+import { Caprasimo, Fraunces, JetBrains_Mono, Manrope } from "next/font/google";
 import "./globals.css";
+
+// next/font сам хостить шрифти — жодного запиту до fonts.googleapis.com.
+// Увага: Fraunces і Caprasimo не мають кирилиці (лише latin/latin-ext),
+// тож український текст на них падає у фолбек із globals.css.
+const fraunces = Fraunces({
+  subsets: ["latin", "latin-ext"],
+  axes: ["SOFT", "WONK", "opsz"],
+  style: ["normal", "italic"],
+  display: "swap",
+  variable: "--font-fraunces",
+});
+
+const caprasimo = Caprasimo({
+  subsets: ["latin", "latin-ext"],
+  weight: "400",
+  display: "swap",
+  variable: "--font-caprasimo",
+});
+
+const manrope = Manrope({
+  subsets: ["latin", "latin-ext", "cyrillic"],
+  display: "swap",
+  variable: "--font-manrope",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin", "latin-ext", "cyrillic"],
+  display: "swap",
+  variable: "--font-jetbrains",
+});
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Providers from "@/components/Providers";
@@ -29,15 +60,10 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="uk">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Fraunces:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html
+      lang="uk"
+      className={`${fraunces.variable} ${caprasimo.variable} ${manrope.variable} ${jetbrainsMono.variable}`}
+    >
       <body className="min-h-full flex flex-col">
         <Providers>
           <Navbar />

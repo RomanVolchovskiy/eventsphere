@@ -7,7 +7,6 @@ import {
   FileText,
   Camera,
   Globe,
-  Sparkles,
   ChevronRight,
   Check,
   Zap,

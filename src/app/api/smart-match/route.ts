@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const { budget, eventType, guestsCount, city, style } = body;
+  // TODO: заглушка — підбір захардкоджений. Фільтри guestsCount / city / style
+  // з тіла запиту поки не впливають на результат.
+  const { budget, eventType } = body;
 
   await new Promise((r) => setTimeout(r, 500));
 

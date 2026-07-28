@@ -5,10 +5,8 @@ import {
   Users,
   CheckCircle2,
   Circle,
-  AlertCircle,
   Plus,
   Bell,
-  ArrowRight,
   Sparkles,
   Clock,
 } from "lucide-react";

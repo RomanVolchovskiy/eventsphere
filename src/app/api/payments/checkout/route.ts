@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
-import { rateLimit, getClientIp } from "@/lib/ratelimit";
+import { rateLimit } from "@/lib/ratelimit";
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);

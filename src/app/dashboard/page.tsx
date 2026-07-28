@@ -45,14 +45,21 @@ export default function DashboardPage() {
   const [newEvent, setNewEvent] = useState({ title: "", date: "", budget: "" });
   const [daysToNext, setDaysToNext] = useState<number | null>(null);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  // Завантаження розділене на чистий fetch і застосування стану, щоб ефект
+  // не викликав setState синхронно (каскадні ререндери).
+  const loadData = useCallback(async () => {
     const [evRes, bkRes] = await Promise.all([
       fetch("/api/events"),
       fetch("/api/bookings"),
     ]);
-    if (evRes.ok) {
-      const data = await evRes.json();
+    return {
+      events: evRes.ok ? ((await evRes.json()).events as Event[]) : null,
+      bookings: bkRes.ok ? ((await bkRes.json()).bookings as Booking[]) : null,
+    };
+  }, []);
+
+  const applyData = useCallback((data: { events: Event[] | null; bookings: Booking[] | null }) => {
+    if (data.events) {
       setEvents(data.events);
       const next = data.events
         .map((e: Event) => Math.ceil((new Date(e.date).getTime() - Date.now()) / 86400000))
@@ -60,17 +67,20 @@ export default function DashboardPage() {
         .sort((a: number, b: number) => a - b)[0] ?? null;
       setDaysToNext(next);
     }
-    if (bkRes.ok) {
-      const data = await bkRes.json();
-      setBookings(data.bookings);
-    }
+    if (data.bookings) setBookings(data.bookings);
     setLoading(false);
   }, []);
 
   useEffect(() => {
     if (status === "unauthenticated") { router.push("/login"); return; }
-    if (status === "authenticated") fetchData();
-  }, [status, router, fetchData]);
+    if (status !== "authenticated") return;
+    let alive = true;
+    (async () => {
+      const data = await loadData();
+      if (alive) applyData(data);
+    })();
+    return () => { alive = false; };
+  }, [status, router, loadData, applyData]);
 
   async function handleCreateEvent(e: React.FormEvent) {
     e.preventDefault();
@@ -83,7 +93,7 @@ export default function DashboardPage() {
     if (res.ok) {
       setShowNewEvent(false);
       setNewEvent({ title: "", date: "", budget: "" });
-      await fetchData();
+      applyData(await loadData());
     }
     setCreating(false);
   }

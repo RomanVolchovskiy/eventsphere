@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 const TICKER = [
   "→ Микола та Софія забронювали Вілла Тиша на 18 червня",
@@ -66,16 +66,23 @@ export default function Hero() {
   );
 }
 
+function subscribeToClock(onTick: () => void) {
+  const id = setInterval(onTick, 1000);
+  return () => clearInterval(id);
+}
+
 function LiveClock() {
-  const [time, setTime] = useState<Date | null>(null);
-  useEffect(() => {
-    setTime(new Date());
-    const id = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
-  if (!time) {
+  // Годинник — зовнішнє джерело, тож useSyncExternalStore, а не setState в ефекті.
+  // На сервері знімок = null, тому розмітка гідратується без розбіжності.
+  const tick = useSyncExternalStore(
+    subscribeToClock,
+    () => Math.floor(Date.now() / 1000),
+    () => null,
+  );
+  if (tick === null) {
     return <span className="mono dim">ЗАРАЗ У МЕРЕЖІ · ––:––:––</span>;
   }
+  const time = new Date(tick * 1000);
   const hh = String(time.getHours()).padStart(2, "0");
   const mm = String(time.getMinutes()).padStart(2, "0");
   const ss = String(time.getSeconds()).padStart(2, "0");

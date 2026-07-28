@@ -54,7 +54,7 @@ export default function Constructor() {
           </h2>
           <p className="noir-lead">
             Кожен етап має куратора, документи та строки. Ви не пишете
-            повідомлень у п'ять чатів — пишете в один.
+            повідомлень у п&apos;ять чатів — пишете в один.
           </p>
         </div>
         <span className="noir-num">№ 02 / 07</span>

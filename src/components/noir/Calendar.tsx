@@ -43,7 +43,7 @@ export default function Calendar() {
         <div className="flex flex-col gap-6 max-w-[640px]">
           <span className="noir-label">Розділ 03 — Планер</span>
           <h2 className="noir-h2">
-            Червень 2026 — <span className="accent">чотири суботи</span>, які варто запам'ятати
+            Червень 2026 — <span className="accent">чотири суботи</span>, які варто запам&apos;ятати
           </h2>
           <p className="noir-lead">
             Жива карта подій редакції. Дати, місця, статуси, кількість

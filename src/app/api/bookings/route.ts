@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { vendorId, serviceId, eventId, date, notes, totalPrice, guests } = body;
+    const { vendorId, serviceId, eventId, date, notes, totalPrice } = body;
 
     if (!vendorId || !date || !totalPrice) {
       return NextResponse.json(

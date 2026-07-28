@@ -41,7 +41,8 @@ export default function SmartMatch() {
         ),
       ),
     }));
-  }, [budget, style, event]);
+    // `event` навмисно не в залежностях — тип події поки не впливає на fit.
+  }, [budget, style]);
 
   return (
     <section className="match-sec" id="smart-match">

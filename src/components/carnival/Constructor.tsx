@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { SectionHead } from "./Festive";
 
 type Tone = "magenta" | "gold" | "mint" | "violet" | "cherry" | "peach" | "pink" | "blue";
@@ -51,11 +51,13 @@ export default function Constructor() {
   );
   const itemCount = Object.values(board).reduce((a, c) => a + c.length, 0);
 
+  // Лічильник замість Date.now()/Math.random(): детерміновано, унікально
+  // в межах сесії й не порушує чистоту рендеру.
+  const uidCounter = useRef(0);
+
   const onDragStart = (e: React.DragEvent, item: PaletteItem) => {
-    setDrag({
-      ...item,
-      uid: `${item.id}-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
-    });
+    uidCounter.current += 1;
+    setDrag({ ...item, uid: `${item.id}-${uidCounter.current}` });
     e.dataTransfer.effectAllowed = "copy";
   };
   const onDrop = (e: React.DragEvent, colId: ColumnId) => {

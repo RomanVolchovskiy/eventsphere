@@ -77,21 +77,34 @@ function MessagesContent() {
 
   useEffect(() => {
     if (status === "unauthenticated") { router.push("/login"); return; }
-    if (status === "authenticated") {
-      fetchConversations().then(() => {
-        if (vendorId) openVendorConversation(vendorId);
-      });
-    }
+    if (status !== "authenticated") return;
+    let alive = true;
+    // Асинхронний IIFE + guard: ефект не викликає setState синхронно і не
+    // оновлює стан після розмонтування.
+    (async () => {
+      await Promise.resolve();
+      if (!alive) return;
+      await fetchConversations();
+      if (alive && vendorId) await openVendorConversation(vendorId);
+    })();
+    return () => { alive = false; };
   }, [status, router, vendorId, fetchConversations, openVendorConversation]);
 
   // Load messages when active conversation changes
   useEffect(() => {
     if (!activeId) return;
-    fetchMessages(activeId);
+    let alive = true;
+    (async () => {
+      await Promise.resolve();
+      if (alive) await fetchMessages(activeId);
+    })();
 
     // Poll for new messages every 3 seconds
     pollRef.current = setInterval(() => fetchMessages(activeId), 3000);
-    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+    return () => {
+      alive = false;
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
   }, [activeId, fetchMessages]);
 
   // Scroll to bottom when messages change

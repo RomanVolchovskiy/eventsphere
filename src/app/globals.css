@@ -38,11 +38,10 @@
   --mono: var(--font-fraunces), "Fraunces", Georgia, serif;
   --mono-code: var(--font-jetbrains), "JetBrains Mono", ui-monospace, Menlo, monospace;
 
-  /* CSS-loaded font family variables (fallbacks) */
-  --font-fraunces: "Fraunces", Georgia, serif;
-  --font-caprasimo: "Caprasimo", Georgia, serif;
-  --font-manrope: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-jetbrains: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  /* --font-fraunces / --font-caprasimo / --font-manrope / --font-jetbrains
+     тепер оголошує next/font через className на <html> (див. app/layout.tsx).
+     Тут їх не дублюємо: :root і клас мають однакову специфічність, тож
+     перевизначення тут перекривало б self-hosted шрифти залежно від порядку. */
 
   /* Legacy aliases */
   --bg: var(--bg-0);

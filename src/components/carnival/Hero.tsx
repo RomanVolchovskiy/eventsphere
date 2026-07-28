@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import Confetti from "./Confetti";
 import { MarqueeFrame, Firework, Balloon, Ticker } from "./Festive";
 
@@ -91,20 +91,27 @@ export default function Hero() {
   );
 }
 
+function subscribeToClock(onTick: () => void) {
+  const id = setInterval(onTick, 1000);
+  return () => clearInterval(id);
+}
+
 function LiveClock() {
-  const [time, setTime] = useState<Date | null>(null);
-  useEffect(() => {
-    setTime(new Date());
-    const id = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
-  if (!time) {
+  // Годинник — зовнішнє джерело, тож useSyncExternalStore, а не setState в ефекті.
+  // На сервері знімок = null, тому розмітка гідратується без розбіжності.
+  const tick = useSyncExternalStore(
+    subscribeToClock,
+    () => Math.floor(Date.now() / 1000),
+    () => null,
+  );
+  if (tick === null) {
     return (
       <span className="mono live">
         <i className="dot" /> LIVE · 2 412 ВИКОНАВЦІВ
       </span>
     );
   }
+  const time = new Date(tick * 1000);
   const hh = String(time.getHours()).padStart(2, "0");
   const mm = String(time.getMinutes()).padStart(2, "0");
   return (

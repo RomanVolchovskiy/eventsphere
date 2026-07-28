@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  MapPin, Star, BadgeCheck, Calendar, ChevronLeft,
-  Globe, Phone, Clock, Users, MessageSquare, Heart,
-  Share2, CheckCircle2, Sparkles, Instagram,
+  MapPin, Star, BadgeCheck, ChevronLeft,
+  Globe, MessageSquare, Heart,
+  Share2, CheckCircle2,
 } from "lucide-react";
 import BookingPanel from "./BookingPanel";
 import { getDb } from "@/lib/db";
