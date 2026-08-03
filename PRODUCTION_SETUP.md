@@ -169,6 +169,29 @@ curl -s -i "https://accounts.google.com/o/oauth2/v2/auth?client_id=<CLIENT_ID>&r
 > верифікація застосунку не потрібна. Якщо колись знадобиться календар, scope додається окремо
 > й тягне за собою верифікацію.
 
+### ⚠️ `NEXTAUTH_URL` — найпідступніша змінна тут
+
+**Симптом:** вхід через Google проходить до кінця, Google питає дозвіл — а потім браузер
+показує `ERR_FAILED` на адресі `http://localhost:3000/api/auth/callback/google...`.
+
+**Причина:** у Vercel `NEXTAUTH_URL` = `http://localhost:3000`. NextAuth будує з неї адресу
+повернення й віддає Google саме її, тож Google слухняно відправляє користувача на його ж
+комп'ютер. Правильне значення — `https://eventsphere-rpmans-projects.vercel.app` (без `/`
+у кінці). Траплялось 2026-08-04: значення злетіло на localhost під час редагування сусідніх
+змінних, і Google-вхід зламався, хоча ключі були правильні.
+
+**Перевірка збоку, без входу в акаунт** — покаже, куди прод просить Google повернути:
+```bash
+U=https://eventsphere-rpmans-projects.vercel.app
+J=$(mktemp); TOK=$(curl -s -c "$J" "$U/api/auth/csrf" | sed -E 's/.*"csrfToken":"([^"]+)".*/\1/')
+curl -s -b "$J" -o /dev/null -D - -X POST "$U/api/auth/signin/google" \
+  --data-urlencode "csrfToken=$TOK" --data-urlencode "callbackUrl=$U/" \
+  | grep -i ^location | grep -oE 'redirect_uri=[^&]+'
+```
+Має вивести `redirect_uri=https%3A%2F%2Feventsphere-rpmans-projects...`, а не `localhost`.
+
+> Вхід поштою від цієї змінної **не залежить** — тому «пошта працює, Google ні» вказує саме сюди.
+
 ---
 
 ## ⚙️ Технічна примітка: БД і rate limiting
@@ -202,5 +225,8 @@ Rate limiting — власний in-memory лімітер (`src/lib/ratelimit.ts
 | Реєстрація/каталог падає | Перевірити `DATABASE_URL` і зробити Redeploy |
 | `Configuration` error на логіні | `NEXTAUTH_SECRET` / `NEXTAUTH_URL` не збігається з доменом |
 | `redirect_uri_mismatch` (Google) | Redirect URI у Google ≠ домен сайту (має точно збігатися) |
+| **Після Google-дозволу браузер кидає `ERR_FAILED` на `localhost:3000`** | `NEXTAUTH_URL` у Vercel вказує на localhost — виправити на прод-домен → Redeploy (див. розділ про `NEXTAUTH_URL`) |
+| Пошта працює, Google — ні | Майже завжди `NEXTAUTH_URL` або `GOOGLE_CLIENT_*`; вхід поштою від них не залежить |
+| Сторінка «працює», але дані вигадані | Перевірити, чи є в ній `getDb()` — див. розділ про хардкод |
 | Бронювання просить оплату, хоча має бути безкоштовним | Прибрати `NEXT_PUBLIC_PAYMENTS_ENABLED` (або ≠ `true`) → Redeploy |
 | Зміни в env не діють | Env підхоплюються лише новим деплоєм — зробіть Redeploy |
