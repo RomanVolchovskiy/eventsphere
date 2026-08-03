@@ -5,14 +5,30 @@ import { Sparkles, Star, ArrowRight, Users, DollarSign, MapPin, Loader2 } from "
 
 type MatchResult = {
   role: string;
-  vendor: { id: string; name: string; rating: number; priceFrom: number; matchScore: number };
+  category: string;
+  vendor: {
+    id: string;
+    name: string;
+    city: string;
+    rating: number;
+    reviewsCount: number;
+    priceFrom: number;
+    subscription: "STANDARD" | "PRO" | "MAX";
+    isVerified: boolean;
+    matchScore: number;
+  };
+  estimatedCost: number;
+  pricingNote: string | null;
+  allocated: number;
   reason: string;
 };
 
 type ApiResponse = {
   matches: MatchResult[];
   totalEstimate: number;
+  budget: number;
   budgetOk: boolean;
+  missingRoles: string[];
   message: string;
 };
 
@@ -24,6 +40,7 @@ export default function SmartMatchPage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ApiResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     eventType: "",
@@ -39,15 +56,25 @@ export default function SmartMatchPage() {
 
   async function runMatch() {
     setLoading(true);
-    const res = await fetch("/api/smart-match", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const data: ApiResponse = await res.json();
-    setResult(data);
-    setLoading(false);
-    setStep(4);
+    setError(null);
+    try {
+      const res = await fetch("/api/smart-match", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Не вдалося виконати підбір. Спробуйте ще раз.");
+        return;
+      }
+      setResult(data as ApiResponse);
+      setStep(4);
+    } catch {
+      setError("Немає зв'язку з сервером. Перевірте інтернет і спробуйте ще раз.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -262,6 +289,12 @@ export default function SmartMatchPage() {
               </div>
             </div>
 
+            {error && (
+              <p className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 rounded-xl px-4 py-3">
+                {error}
+              </p>
+            )}
+
             <div className="flex gap-3">
               <button
                 onClick={() => setStep(2)}
@@ -297,20 +330,33 @@ export default function SmartMatchPage() {
               <div className="w-14 h-14 bg-[var(--gold)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Sparkles className="w-7 h-7 text-[var(--gold)]" />
               </div>
-              <h2 className="text-white font-bold text-xl mb-2">Команда мрії знайдена!</h2>
+              <h2 className="text-white font-bold text-xl mb-2">
+                {result.matches.length > 0 ? "Команда мрії знайдена!" : "Поки без результату"}
+              </h2>
               <p className="text-[var(--text-muted)] text-sm">{result.message}</p>
             </div>
 
             <div className="space-y-4">
-              {result.matches.map((m, i) => (
+              {result.matches.map((m) => (
                 <div
-                  key={i}
+                  key={m.category}
                   className="bg-[var(--dark-card)] border border-[var(--dark-border)] rounded-2xl p-5 hover:border-[var(--gold)]/50 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div>
                       <p className="text-[var(--gold)] text-xs font-medium mb-1">{m.role}</p>
-                      <h3 className="text-white font-semibold">{m.vendor.name}</h3>
+                      <h3 className="text-white font-semibold flex items-center gap-2">
+                        {m.vendor.name}
+                        {m.vendor.subscription !== "STANDARD" && (
+                          <span className="text-[10px] uppercase tracking-wide border border-[var(--gold)]/40 text-[var(--gold)] px-1.5 py-0.5 rounded">
+                            {m.vendor.subscription}
+                          </span>
+                        )}
+                      </h3>
+                      <p className="text-[var(--text-muted)] text-xs mt-1 flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {m.vendor.city}
+                      </p>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <div className="text-xs bg-[var(--gold)]/10 text-[var(--gold)] px-2 py-1 rounded-full">
@@ -319,15 +365,23 @@ export default function SmartMatchPage() {
                     </div>
                   </div>
                   <p className="text-[var(--text-muted)] text-sm mb-3">{m.reason}</p>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1">
                         <Star className="w-3.5 h-3.5 text-[var(--gold)] fill-[var(--gold)]" />
-                        <span className="text-white text-sm">{m.vendor.rating}</span>
+                        <span className="text-white text-sm">
+                          {m.vendor.reviewsCount > 0 ? m.vendor.rating.toFixed(1) : "—"}
+                        </span>
+                        <span className="text-[var(--text-muted)] text-xs">
+                          ({m.vendor.reviewsCount})
+                        </span>
                       </div>
-                      <span className="text-[var(--text-muted)] text-sm">
-                        від {m.vendor.priceFrom.toLocaleString("uk-UA")} ₴
+                      <span className="text-white text-sm">
+                        ≈ {m.estimatedCost.toLocaleString("uk-UA")} ₴
                       </span>
+                      {m.pricingNote && (
+                        <span className="text-[var(--text-muted)] text-xs">{m.pricingNote}</span>
+                      )}
                     </div>
                     <a
                       href={`/catalog/${m.vendor.id}`}
@@ -336,29 +390,49 @@ export default function SmartMatchPage() {
                       Профіль <ArrowRight className="w-3 h-3" />
                     </a>
                   </div>
+                  <div className="mt-3 pt-3 border-t border-[var(--dark-border)] flex items-center justify-between text-xs">
+                    <span className="text-[var(--text-muted)]">
+                      Бюджет на роль: {m.allocated.toLocaleString("uk-UA")} ₴
+                    </span>
+                    <span className={m.estimatedCost <= m.allocated ? "text-green-400" : "text-yellow-400"}>
+                      {m.estimatedCost <= m.allocated
+                        ? `економія ${(m.allocated - m.estimatedCost).toLocaleString("uk-UA")} ₴`
+                        : `+${(m.estimatedCost - m.allocated).toLocaleString("uk-UA")} ₴ понад`}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
 
-            <div className={`rounded-2xl p-5 border ${result.budgetOk ? "bg-green-400/5 border-green-400/20" : "bg-yellow-400/5 border-yellow-400/20"}`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={`text-sm font-medium mb-1 ${result.budgetOk ? "text-green-400" : "text-yellow-400"}`}>
-                    {result.budgetOk ? "Вписується у бюджет" : "Дещо вище бюджету"}
-                  </p>
-                  <p className="text-[var(--text-muted)] text-xs">
-                    Орієнтовна вартість команди
+            {result.missingRoles.length > 0 && (
+              <p className="text-[var(--text-muted)] text-sm bg-[var(--dark-card)] border border-[var(--dark-border)] rounded-2xl p-4">
+                Під ці ролі виконавців у каталозі ще немає:{" "}
+                <span className="text-white">{result.missingRoles.join(", ")}</span>. Ми повідомимо,
+                щойно вони з&apos;являться.
+              </p>
+            )}
+
+            {result.matches.length > 0 && (
+              <div className={`rounded-2xl p-5 border ${result.budgetOk ? "bg-green-400/5 border-green-400/20" : "bg-yellow-400/5 border-yellow-400/20"}`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className={`text-sm font-medium mb-1 ${result.budgetOk ? "text-green-400" : "text-yellow-400"}`}>
+                      {result.budgetOk ? "Вписується у бюджет" : "Дещо вище бюджету"}
+                    </p>
+                    <p className="text-[var(--text-muted)] text-xs">
+                      Орієнтовна вартість команди з {result.budget.toLocaleString("uk-UA")} ₴
+                    </p>
+                  </div>
+                  <p className="text-white font-bold text-xl">
+                    {result.totalEstimate.toLocaleString("uk-UA")} ₴
                   </p>
                 </div>
-                <p className="text-white font-bold text-xl">
-                  {result.totalEstimate.toLocaleString("uk-UA")} ₴
-                </p>
               </div>
-            </div>
+            )}
 
             <div className="flex gap-3">
               <button
-                onClick={() => { setStep(1); setResult(null); }}
+                onClick={() => { setStep(1); setResult(null); setError(null); }}
                 className="flex-1 border border-[var(--dark-border)] text-[var(--text-muted)] py-3.5 rounded-xl hover:border-[var(--gold)] hover:text-[var(--gold)] transition-colors text-sm"
               >
                 Нові параметри
