@@ -10,104 +10,90 @@ import {
   SlidersHorizontal,
   Search,
 } from "lucide-react";
+import { getDb } from "@/lib/db";
 
+// `id` — значення для ?cat=…, `enum` — відповідник у EventCategory (prisma/schema.prisma)
 const categories = [
-  { id: "all", label: "Всі", icon: null },
-  { id: "venue", label: "Локації", icon: MapPin },
-  { id: "entertainment", label: "Шоу-програма", icon: Music },
-  { id: "catering", label: "Кейтеринг", icon: UtensilsCrossed },
-  { id: "photo", label: "Фото/Відео", icon: Camera },
-  { id: "decor", label: "Декор", icon: Flower2 },
-];
+  { id: "all", label: "Всі", icon: null, enum: null },
+  { id: "venue", label: "Локації", icon: MapPin, enum: "VENUE" },
+  { id: "entertainment", label: "Шоу-програма", icon: Music, enum: "ENTERTAINMENT" },
+  { id: "catering", label: "Кейтеринг", icon: UtensilsCrossed, enum: "CATERING" },
+  { id: "photo", label: "Фото/Відео", icon: Camera, enum: "PHOTO_VIDEO" },
+  { id: "decor", label: "Декор", icon: Flower2, enum: "DECOR" },
+] as const;
 
-const vendors = [
-  {
-    id: "1",
-    name: "Crystal Hall",
-    category: "venue",
-    categoryLabel: "Локація",
-    city: "Київ",
-    rating: 4.9,
-    reviews: 128,
-    priceFrom: 15000,
-    isVerified: true,
-    has360: true,
-    tags: ["Весілля", "Корпоратив", "Банкет"],
-    image: null,
-  },
-  {
-    id: "2",
-    name: "Артем Мороз — Ведучий",
-    category: "entertainment",
-    categoryLabel: "Шоу-програма",
-    city: "Київ",
-    rating: 5.0,
-    reviews: 87,
-    priceFrom: 8000,
-    isVerified: true,
-    has360: false,
-    tags: ["Весілля", "День народження", "Корпоратив"],
-    image: null,
-  },
-  {
-    id: "3",
-    name: "Catering Pro",
-    category: "catering",
-    categoryLabel: "Кейтеринг",
-    city: "Харків",
-    rating: 4.8,
-    reviews: 54,
-    priceFrom: 450,
-    isVerified: true,
-    has360: false,
-    tags: ["Фуршет", "Банкет", "Виїзна кухня"],
-    image: null,
-  },
-  {
-    id: "4",
-    name: "Студія Lumière",
-    category: "photo",
-    categoryLabel: "Фото/Відео",
-    city: "Київ",
-    rating: 4.9,
-    reviews: 211,
-    priceFrom: 5000,
-    isVerified: true,
-    has360: false,
-    tags: ["Фотозйомка", "Відеозйомка", "Аерозйомка"],
-    image: null,
-  },
-  {
-    id: "5",
-    name: "FlowerBox Studio",
-    category: "decor",
-    categoryLabel: "Декор",
-    city: "Одеса",
-    rating: 4.7,
-    reviews: 93,
-    priceFrom: 3000,
-    isVerified: false,
-    has360: false,
-    tags: ["Квіти", "Архи", "Живі стіни"],
-    image: null,
-  },
-  {
-    id: "6",
-    name: "Ресторан Panorama",
-    category: "venue",
-    categoryLabel: "Локація",
-    city: "Львів",
-    rating: 4.8,
-    reviews: 76,
-    priceFrom: 12000,
-    isVerified: true,
-    has360: true,
-    tags: ["Весілля", "День народження", "Романтик"],
-    image: null,
-  },
-];
+const CATEGORY_LABELS: Record<string, string> = {
+  VENUE: "Локація",
+  ENTERTAINMENT: "Шоу-програма",
+  CATERING: "Кейтеринг",
+  PHOTO_VIDEO: "Фото/Відео",
+  DECOR: "Декор",
+};
 
-export default function CatalogPage() {
+// Кольори підпису категорії на картці — ключі збігаються з EventCategory
+const CATEGORY_COLORS: Record<string, string> = {
+  VENUE: "text-blue-400",
+  ENTERTAINMENT: "text-purple-400",
+  CATERING: "text-orange-400",
+  PHOTO_VIDEO: "text-pink-400",
+  DECOR: "text-green-400",
+};
+
+const tagsByCategory: Record<string, string[]> = {
+  VENUE: ["Весілля", "Корпоратив", "Банкет"],
+  ENTERTAINMENT: ["Ведучий", "DJ", "Музика"],
+  CATERING: ["Фуршет", "Банкет", "Кейтеринг"],
+  PHOTO_VIDEO: ["Фотозйомка", "Відеозйомка", "360°"],
+  DECOR: ["Квіти", "Декор", "Оформлення"],
+};
+
+// «1 виконавця / 2 виконавців / 5 виконавців» — українська форма множини
+function declineVendors(n: number): string {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return "виконавця";
+  return "виконавців";
+}
+
+type VendorCardData = {
+  id: string;
+  businessName: string;
+  category: string;
+  city: string;
+  rating: number;
+  reviewsCount: number;
+  priceFrom: number | null;
+  isVerified: boolean;
+  panoramaUrl: string | null;
+  photos: string[];
+};
+
+export default async function CatalogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cat?: string }>;
+}) {
+  const { cat } = await searchParams;
+  const activeCat = categories.find((c) => c.id === cat) ?? categories[0];
+
+  const db = getDb();
+  const vendors: VendorCardData[] = await db.vendor.findMany({
+    where: activeCat.enum ? { category: activeCat.enum } : undefined,
+    orderBy: [{ rating: "desc" }, { reviewsCount: "desc" }],
+    select: {
+      id: true,
+      businessName: true,
+      category: true,
+      city: true,
+      rating: true,
+      reviewsCount: true,
+      priceFrom: true,
+      isVerified: true,
+      panoramaUrl: true,
+      photos: true,
+    },
+  });
+
   return (
     <div className="pt-16 min-h-screen">
       {/* Header */}
@@ -138,16 +124,23 @@ export default function CatalogPage() {
         {/* Category tabs */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-2 overflow-x-auto pb-0 -mb-px scrollbar-hide">
-            {categories.map((cat) => (
-              <Link
-                key={cat.id}
-                href={cat.id === "all" ? "/catalog" : `/catalog?cat=${cat.id}`}
-                className="flex items-center gap-2 px-4 py-3 text-sm whitespace-nowrap border-b-2 border-transparent hover:text-white text-[var(--text-muted)] transition-colors"
-              >
-                {cat.icon && <cat.icon className="w-4 h-4" />}
-                {cat.label}
-              </Link>
-            ))}
+            {categories.map((c) => {
+              const isActive = c.id === activeCat.id;
+              return (
+                <Link
+                  key={c.id}
+                  href={c.id === "all" ? "/catalog" : `/catalog?cat=${c.id}`}
+                  className={`flex items-center gap-2 px-4 py-3 text-sm whitespace-nowrap border-b-2 transition-colors ${
+                    isActive
+                      ? "border-[var(--gold)] text-[var(--gold)]"
+                      : "border-transparent text-[var(--text-muted)] hover:text-white"
+                  }`}
+                >
+                  {c.icon && <c.icon className="w-4 h-4" />}
+                  {c.label}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -156,7 +149,15 @@ export default function CatalogPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-6">
           <p className="text-[var(--text-muted)] text-sm">
-            Знайдено <span className="text-white font-medium">{vendors.length}</span> виконавців
+            Знайдено{" "}
+            <span className="text-white font-medium">{vendors.length}</span>{" "}
+            {declineVendors(vendors.length)}
+            {activeCat.enum && (
+              <span className="text-[var(--text-muted)]">
+                {" "}
+                у категорії «{activeCat.label}»
+              </span>
+            )}
           </p>
           <select className="bg-[var(--dark-card)] border border-[var(--dark-border)] rounded-lg px-3 py-2 text-sm text-[var(--text-muted)] focus:outline-none focus:border-[var(--gold)]">
             <option>За рейтингом</option>
@@ -166,24 +167,36 @@ export default function CatalogPage() {
           </select>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {vendors.map((v) => (
-            <VendorCard key={v.id} vendor={v} />
-          ))}
-        </div>
+        {vendors.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="text-4xl opacity-20 mb-4">🔍</div>
+            <p className="text-white font-medium mb-1">Поки що порожньо</p>
+            <p className="text-[var(--text-muted)] text-sm mb-6">
+              У цій категорії ще немає виконавців.
+            </p>
+            <Link
+              href="/catalog"
+              className="text-[var(--gold)] text-sm hover:underline"
+            >
+              Переглянути всі категорії →
+            </Link>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {vendors.map((v) => (
+              <VendorCard key={v.id} vendor={v} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function VendorCard({ vendor }: { vendor: (typeof vendors)[0] }) {
-  const categoryColors: Record<string, string> = {
-    venue: "text-blue-400",
-    entertainment: "text-purple-400",
-    catering: "text-orange-400",
-    photo: "text-pink-400",
-    decor: "text-green-400",
-  };
+function VendorCard({ vendor }: { vendor: VendorCardData }) {
+  const tags = tagsByCategory[vendor.category] ?? [];
+  const has360 = Boolean(vendor.panoramaUrl);
+  const cover = vendor.photos[0];
 
   return (
     <Link
@@ -192,8 +205,17 @@ function VendorCard({ vendor }: { vendor: (typeof vendors)[0] }) {
     >
       {/* Photo placeholder */}
       <div className="h-48 bg-gradient-to-br from-[var(--dark)] to-[var(--dark-border)] flex items-center justify-center relative">
-        <div className="text-4xl opacity-20">📸</div>
-        {vendor.has360 && (
+        {cover ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={cover}
+            alt={vendor.businessName}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="text-4xl opacity-20">📸</div>
+        )}
+        {has360 && (
           <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-[var(--gold)] text-xs px-2 py-1 rounded-full border border-[var(--gold)]/30">
             360°
           </div>
@@ -209,18 +231,26 @@ function VendorCard({ vendor }: { vendor: (typeof vendors)[0] }) {
       <div className="p-5">
         <div className="flex items-start justify-between gap-2 mb-2">
           <h3 className="text-white font-semibold group-hover:text-[var(--gold)] transition-colors">
-            {vendor.name}
+            {vendor.businessName}
           </h3>
           <div className="flex items-center gap-1 flex-shrink-0">
             <Star className="w-4 h-4 text-[var(--gold)] fill-[var(--gold)]" />
-            <span className="text-white text-sm font-medium">{vendor.rating}</span>
-            <span className="text-[var(--text-muted)] text-xs">({vendor.reviews})</span>
+            <span className="text-white text-sm font-medium">
+              {vendor.rating.toFixed(1)}
+            </span>
+            <span className="text-[var(--text-muted)] text-xs">
+              ({vendor.reviewsCount})
+            </span>
           </div>
         </div>
 
         <div className="flex items-center gap-3 mb-3">
-          <span className={`text-xs font-medium ${categoryColors[vendor.category] || "text-gray-400"}`}>
-            {vendor.categoryLabel}
+          <span
+            className={`text-xs font-medium ${
+              CATEGORY_COLORS[vendor.category] ?? "text-gray-400"
+            }`}
+          >
+            {CATEGORY_LABELS[vendor.category] ?? vendor.category}
           </span>
           <div className="flex items-center gap-1 text-[var(--text-muted)] text-xs">
             <MapPin className="w-3 h-3" />
@@ -229,7 +259,7 @@ function VendorCard({ vendor }: { vendor: (typeof vendors)[0] }) {
         </div>
 
         <div className="flex flex-wrap gap-1 mb-4">
-          {vendor.tags.map((tag) => (
+          {tags.map((tag) => (
             <span
               key={tag}
               className="bg-[var(--dark)] text-[var(--text-muted)] text-xs px-2 py-0.5 rounded-full border border-[var(--dark-border)]"
@@ -241,10 +271,18 @@ function VendorCard({ vendor }: { vendor: (typeof vendors)[0] }) {
 
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-[var(--text-muted)] text-xs">від </span>
-            <span className="text-white font-semibold">
-              {vendor.priceFrom.toLocaleString("uk-UA")} ₴
-            </span>
+            {vendor.priceFrom !== null ? (
+              <>
+                <span className="text-[var(--text-muted)] text-xs">від </span>
+                <span className="text-white font-semibold">
+                  {vendor.priceFrom.toLocaleString("uk-UA")} ₴
+                </span>
+              </>
+            ) : (
+              <span className="text-[var(--text-muted)] text-sm">
+                Ціна за запитом
+              </span>
+            )}
           </div>
           <span className="text-[var(--gold)] text-sm group-hover:underline">Деталі →</span>
         </div>

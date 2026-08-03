@@ -1,5 +1,4 @@
 import "dotenv/config";
-import bcrypt from "bcryptjs";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
@@ -10,41 +9,35 @@ const db = new PrismaClient({
 async function main() {
   console.log("🌱 Seeding database...");
 
-  const hash = await bcrypt.hash("password123", 12);
-
-  const clientUser = await db.user.upsert({
-    where: { email: "test@eventsphere.com" },
-    update: {},
-    create: { name: "Тест Користувач", email: "test@eventsphere.com", passwordHash: hash, role: "CLIENT" },
-  });
-
+  // Демо-виконавці існують лише для наповнення каталогу — пароля їм не ставимо,
+  // тому зайти цими акаунтами неможливо (див. перевірку passwordHash у src/lib/auth.ts).
   const v1 = await db.user.upsert({
     where: { email: "crystal@eventsphere.com" },
     update: {},
-    create: { name: "Crystal Hall", email: "crystal@eventsphere.com", passwordHash: hash, role: "VENDOR" },
+    create: { name: "Crystal Hall", email: "crystal@eventsphere.com", role: "VENDOR" },
   });
   const v2 = await db.user.upsert({
     where: { email: "artem@eventsphere.com" },
     update: {},
-    create: { name: "Артем Мороз", email: "artem@eventsphere.com", passwordHash: hash, role: "VENDOR" },
+    create: { name: "Артем Мороз", email: "artem@eventsphere.com", role: "VENDOR" },
   });
   const v3 = await db.user.upsert({
     where: { email: "catering@eventsphere.com" },
     update: {},
-    create: { name: "Catering Pro", email: "catering@eventsphere.com", passwordHash: hash, role: "VENDOR" },
+    create: { name: "Catering Pro", email: "catering@eventsphere.com", role: "VENDOR" },
   });
   const v4 = await db.user.upsert({
     where: { email: "lumiere@eventsphere.com" },
     update: {},
-    create: { name: "Студія Lumière", email: "lumiere@eventsphere.com", passwordHash: hash, role: "VENDOR" },
+    create: { name: "Студія Lumière", email: "lumiere@eventsphere.com", role: "VENDOR" },
   });
   const v5 = await db.user.upsert({
     where: { email: "flowerbox@eventsphere.com" },
     update: {},
-    create: { name: "FlowerBox Studio", email: "flowerbox@eventsphere.com", passwordHash: hash, role: "VENDOR" },
+    create: { name: "FlowerBox Studio", email: "flowerbox@eventsphere.com", role: "VENDOR" },
   });
 
-  console.log("✅ Users:", clientUser.email, v1.email, v2.email, v3.email, v4.email, v5.email);
+  console.log("✅ Users:", v1.email, v2.email, v3.email, v4.email, v5.email);
 
   await db.vendor.upsert({
     where: { userId: v1.id },
@@ -98,7 +91,8 @@ async function main() {
   });
 
   console.log("✅ Vendors created");
-  console.log("\n🎉 Done! Login: test@eventsphere.com / password123");
+  console.log("\n🎉 Done! Тестового клієнтського акаунта seed більше не створює —");
+  console.log("   реєструйтесь через /register. Демо-виконавці лишаються для каталогу.");
 }
 
 main()
