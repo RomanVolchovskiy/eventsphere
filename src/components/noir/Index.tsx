@@ -62,7 +62,7 @@ export default function Index() {
     <section className="noir-section" id="daily">
       <div className="flex items-end justify-between gap-8 flex-wrap mb-8">
         <div className="flex flex-col gap-6 max-w-[640px]">
-          <span className="noir-label">Розділ 05 — Daily Index</span>
+          <span className="noir-label">Щоденні послуги</span>
           <h2 className="noir-h2">
             Що відбувається <span className="accent">сьогодні</span> у місті
           </h2>
@@ -71,7 +71,6 @@ export default function Index() {
             відкриття, дегустації, поп-ап вечері. Без афіш і шуму.
           </p>
         </div>
-        <span className="noir-num">№ 05 / 07</span>
       </div>
 
       <div className="noir-index">

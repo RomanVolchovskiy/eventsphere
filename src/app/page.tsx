@@ -1,4 +1,5 @@
 import Hero from "@/components/noir/Hero";
+import HowItWorks from "@/components/noir/HowItWorks";
 import Featured from "@/components/noir/Featured";
 import Constructor from "@/components/noir/Constructor";
 import Calendar from "@/components/noir/Calendar";
@@ -11,6 +12,7 @@ export default function Home() {
   return (
     <>
       <Hero />
+      <HowItWorks />
       <Featured />
       <Constructor />
       <Calendar />

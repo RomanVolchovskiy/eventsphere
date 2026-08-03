@@ -21,7 +21,7 @@ export default function Match() {
     <section className="noir-section" id="smart-match">
       <div className="flex items-end justify-between gap-8 flex-wrap mb-8">
         <div className="flex flex-col gap-6 max-w-[640px]">
-          <span className="noir-label">Розділ 04 — Smart Match</span>
+          <span className="noir-label">Smart Match — підбір команди</span>
           <h2 className="noir-h2">
             Команда за <span className="accent">сімдесят дві</span> секунди
           </h2>
@@ -30,7 +30,6 @@ export default function Match() {
             ансамбль. Куратор перевіряє кожну рекомендацію вручну.
           </p>
         </div>
-        <span className="noir-num">№ 04 / 07</span>
       </div>
 
       <div className="noir-match-frame">

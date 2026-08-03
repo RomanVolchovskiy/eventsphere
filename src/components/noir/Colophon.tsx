@@ -14,7 +14,7 @@ export default function Colophon() {
     <section className="noir-section" id="colophon">
       <div className="flex items-end justify-between gap-8 flex-wrap mb-8">
         <div className="flex flex-col gap-6 max-w-[720px]">
-          <span className="noir-label">Розділ 07 — Колофон</span>
+          <span className="noir-label">Про ЄСвято</span>
           <h2 className="noir-h2">
             Не платформа.<br />
             <span className="accent">Редакція</span> святкування.
@@ -25,7 +25,6 @@ export default function Colophon() {
             ухвалюють люди. Звітність відкрита.
           </p>
         </div>
-        <span className="noir-num">№ 07 / 07</span>
       </div>
 
       <div

@@ -48,7 +48,7 @@ export default function Constructor() {
     <section className="noir-section" id="constructor">
       <div className="flex items-end justify-between gap-8 flex-wrap mb-8">
         <div className="flex flex-col gap-6 max-w-[640px]">
-          <span className="noir-label">Розділ 02 — Процес</span>
+          <span className="noir-label">Як ми ведемо подію</span>
           <h2 className="noir-h2">
             Чотири акти, які <span className="accent">знімають</span> з вас організацію
           </h2>
@@ -57,7 +57,6 @@ export default function Constructor() {
             повідомлень у п&apos;ять чатів — пишете в один.
           </p>
         </div>
-        <span className="noir-num">№ 02 / 07</span>
       </div>
 
       <div className="noir-steps">

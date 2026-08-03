@@ -38,7 +38,7 @@ export default function Pro() {
     <section className="noir-section" id="pro">
       <div className="flex items-end justify-between gap-8 flex-wrap mb-8">
         <div className="flex flex-col gap-6 max-w-[640px]">
-          <span className="noir-label">Розділ 06 — Membership</span>
+          <span className="noir-label">Для виконавців</span>
           <h2 className="noir-h2">
             Pro — для тих, хто <span className="accent">не питає</span> ціну
           </h2>
@@ -47,7 +47,6 @@ export default function Pro() {
             чотирьох подій на рік. Усі сервіси редакції в одному пакеті.
           </p>
         </div>
-        <span className="noir-num">№ 06 / 07</span>
       </div>
 
       <div className="noir-pro">

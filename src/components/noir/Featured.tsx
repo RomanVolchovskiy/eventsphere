@@ -52,7 +52,7 @@ export default function Featured() {
     <section className="noir-section" id="featured">
       <div className="flex items-end justify-between gap-8 flex-wrap mb-8">
         <div className="flex flex-col gap-6 max-w-[640px]">
-          <span className="noir-label">Розділ 01 — Підбірка</span>
+          <span className="noir-label">Приклади свят</span>
           <h2 className="noir-h2">
             Кращі історії <span className="accent">сезону</span>
           </h2>
@@ -61,7 +61,6 @@ export default function Featured() {
             редакція брала участь — і за які ручається.
           </p>
         </div>
-        <span className="noir-num">№ 01 / 07</span>
       </div>
 
       <div className="noir-featured-grid">

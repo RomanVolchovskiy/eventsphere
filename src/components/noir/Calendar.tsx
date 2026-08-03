@@ -41,7 +41,7 @@ export default function Calendar() {
     <section className="noir-section" id="planner">
       <div className="flex items-end justify-between gap-8 flex-wrap mb-8">
         <div className="flex flex-col gap-6 max-w-[640px]">
-          <span className="noir-label">Розділ 03 — Планер</span>
+          <span className="noir-label">Планувальник</span>
           <h2 className="noir-h2">
             Червень 2026 — <span className="accent">чотири суботи</span>, які варто запам&apos;ятати
           </h2>
@@ -50,7 +50,6 @@ export default function Calendar() {
             гостей — без перевідкривання дюжини вкладок.
           </p>
         </div>
-        <span className="noir-num">№ 03 / 07</span>
       </div>
 
       <div className="noir-calendar">

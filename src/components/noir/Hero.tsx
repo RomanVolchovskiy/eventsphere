@@ -5,7 +5,7 @@ export default function Hero() {
     <section className="noir-hero">
       <div className="noir-hero-grid">
         <div className="noir-hero-left">
-          <span className="noir-label">Edition №&nbsp;04 — Noir · 2026</span>
+          <span className="noir-label">Виконавці для свят по всій Україні</span>
 
           <h1 className="noir-display noir-initial">
             <span className="initial">Є</span>
@@ -16,19 +16,25 @@ export default function Hero() {
             </span>
           </h1>
 
+          {/* Головне речення сторінки: перше, що має пояснити, куди людина
+              потрапила. Поетичний рядок вище лишається знаком бренду. */}
+          <p className="noir-pitch">
+            Зал, кейтеринг, фото, ведучий, декор — зберіть команду для свята
+            в одному місці.
+          </p>
+
           <p className="noir-lead">
-            ЄСвято — це редакція святкування. Ми збираємо найкращих
-            виконавців України, програмуємо логістику до хвилини й
-            залишаємо вам тільки одне — присутність у моменті.
+            Опишіть захід за три кроки, і ми підберемо виконавців під ваш
+            бюджет і кількість гостей. Бронювання прямо на сайті, без передоплати.
           </p>
 
           <div className="noir-cta-row">
-            <Link href="#constructor" className="btn-elegant">
-              <span>Скласти&nbsp;подію</span>
+            <Link href="/smart-match" className="btn-elegant">
+              <span>Підібрати&nbsp;команду</span>
               <span className="arr">→</span>
             </Link>
-            <Link href="/smart-match" className="btn-elegant-ghost">
-              <span>Підібрати&nbsp;команду</span>
+            <Link href="/catalog" className="btn-elegant-ghost">
+              <span>Переглянути&nbsp;каталог</span>
               <span className="arr">↗</span>
             </Link>
           </div>
