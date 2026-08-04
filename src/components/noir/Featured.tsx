@@ -3,47 +3,47 @@ import Link from "next/link";
 const CELLS = [
   {
     num: "01",
-    tag: "Featured",
+    tag: "Весілля",
     title: "Весілля у Кам'янці",
-    body: "Триденна камерна церемонія в каньйоні над Смотричем. 84 гостя, 12 виконавців, без compromise.",
+    body: "Три дні у каньйоні над Смотричем. 84 гостя, 12 виконавців.",
     feature: true,
     span2: true,
-    href: "/catalog",
+    href: "/catalog?cat=venue",
   },
   {
     num: "02",
     tag: "Корпоратив",
     title: "Зимовий вечір BlockOne",
-    body: "1 200 запрошених. Подвір'я Арсеналу.",
-    href: "/catalog",
+    body: "1 200 запрошених у подвір'ї Арсеналу.",
+    href: "/catalog?cat=venue",
   },
   {
     num: "03",
-    tag: "Live",
-    title: "Музика без алгоритму",
-    body: "Куратор підбирає квартет, дует, або біг-бенд за брифом.",
-    href: "/smart-match",
+    tag: "Музика",
+    title: "Ведучий і музиканти",
+    body: "Дует, квартет чи біг-бенд — підберемо під формат свята.",
+    href: "/catalog?cat=entertainment",
   },
   {
     num: "04",
-    tag: "Production",
-    title: "Світло як режисура",
-    body: "Технічний продакшен від проєкту до демонтажу. Свій склад, свої інженери.",
-    href: "/catalog",
+    tag: "Фото і відео",
+    title: "Зйомка свята",
+    body: "Фотографи й відеооператори: репортаж, постановка, аерозйомка.",
+    href: "/catalog?cat=photo",
   },
   {
     num: "05",
-    tag: "Catering",
-    title: "Кухня шефа на виїзді",
-    body: "Сезонне меню. Локальні продукти. Шеф приходить особисто.",
-    href: "/catalog",
+    tag: "Кейтеринг",
+    title: "Кухня на виїзді",
+    body: "Меню під ваш формат. Шеф і команда приїжджають на місце.",
+    href: "/catalog?cat=catering",
   },
   {
     num: "06",
-    tag: "Decor",
-    title: "Сценографія простору",
-    body: "Архітектурні інсталяції, флористика, інтер'єрна графіка.",
-    href: "/catalog",
+    tag: "Декор",
+    title: "Оформлення залу",
+    body: "Квіти, арки, світло, оформлення столів і фотозони.",
+    href: "/catalog?cat=decor",
   },
 ];
 
@@ -54,11 +54,11 @@ export default function Featured() {
         <div className="flex flex-col gap-6 max-w-[640px]">
           <span className="noir-label">Приклади свят</span>
           <h2 className="noir-h2">
-            Кращі історії <span className="accent">сезону</span>
+            Свята, які вже <span className="accent">провели</span>
           </h2>
           <p className="noir-lead">
-            Не каталог послуг, а архів подій. Шість випадків, в яких
-            редакція брала участь — і за які ручається.
+            Приклади заходів: скільки було гостей, кого запрошували,
+            як усе минуло.
           </p>
         </div>
       </div>
@@ -79,7 +79,7 @@ export default function Featured() {
             <div className="flex flex-col gap-4">
               <h3 className="noir-cell-title">{c.title}</h3>
               <p className="noir-cell-body">{c.body}</p>
-              <span className="noir-num mt-2">Читати випадок →</span>
+              <span className="noir-num mt-2">Подивитись виконавців →</span>
             </div>
           </Link>
         ))}

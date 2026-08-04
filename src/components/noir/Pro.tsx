@@ -1,35 +1,37 @@
 import Link from "next/link";
 
+// Відповідає тарифам на сторінці /pro — там Standard безкоштовний,
+// PRO 990 ₴/міс, MAX 2 490 ₴/міс.
 const FEATURES = [
   {
     ico: "I",
-    label: "Особистий куратор",
-    desc: "Один контакт замість десяти підрядників. Доступний на весь цикл події.",
+    label: "Профіль у каталозі",
+    desc: "Фото робіт, ціни, опис послуг. Клієнти знаходять вас через пошук і підбір.",
   },
   {
     ico: "II",
-    label: "Smart Match Pro",
-    desc: "Розширений алгоритм підбору з ваги для вашого попереднього досвіду та переваг.",
+    label: "Запити напряму",
+    desc: "Клієнт пише вам на сайті. Без посередників і комісії з боку платформи.",
   },
   {
     ico: "III",
-    label: "Ескроу платежі",
-    desc: "Гроші — на блокованому рахунку до виконання робіт. Виконавці отримують після події.",
+    label: "Вище в пошуку",
+    desc: "Платні тарифи піднімають ваш профіль у видачі та в підборі команди.",
   },
   {
     ico: "IV",
-    label: "Документообіг",
-    desc: "Договори, акти, рахунки — підготовлені редакцією. Один підпис замість дванадцяти.",
+    label: "Відгуки та рейтинг",
+    desc: "Оцінки від справжніх клієнтів, які бачать усі. Хороша робота — більше замовлень.",
   },
   {
     ico: "V",
-    label: "Архів подій",
-    desc: "Всі ваші заходи в одному місці: команди, кошториси, фото — для наступних разів.",
+    label: "Договори й рахунки",
+    desc: "Готові шаблони договорів, рахунки в PDF одним натисканням.",
   },
   {
     ico: "VI",
-    label: "Закриті події",
-    desc: "Доступ до запрошень, які ніколи не з'являються в публічному календарі.",
+    label: "Статистика",
+    desc: "Скільки людей подивилось профіль, скільки написало, скільки заробили.",
   },
 ];
 
@@ -40,11 +42,11 @@ export default function Pro() {
         <div className="flex flex-col gap-6 max-w-[640px]">
           <span className="noir-label">Для виконавців</span>
           <h2 className="noir-h2">
-            Pro — для тих, хто <span className="accent">не питає</span> ціну
+            Ви виконавець? <span className="accent">Отримуйте замовлення</span>
           </h2>
           <p className="noir-lead">
-            Річна підписка для людей і компаній, які проводять від
-            чотирьох подій на рік. Усі сервіси редакції в одному пакеті.
+            Розмістіть себе в каталозі — безкоштовно. Платні тарифи піднімають
+            вище в пошуку й додають інструменти для роботи з клієнтами.
           </p>
         </div>
       </div>
@@ -65,16 +67,14 @@ export default function Pro() {
         </div>
 
         <div className="noir-pro-card">
-          <div className="flex items-center justify-between">
-            <span className="noir-label">ЄСвято Pro · 2026</span>
-            <span className="noir-num">Membership</span>
-          </div>
+          <span className="noir-label">Скільки коштує</span>
+
           <div>
-            <div className="noir-pro-price">
-              <span className="cur">$</span>2&nbsp;400
-            </div>
+            <div className="noir-pro-price">0&nbsp;₴</div>
             <div className="noir-pro-price" style={{ marginTop: 8 }}>
-              <span className="per">на рік / включно з усіма сервісами</span>
+              <span className="per">
+                щоб почати — профіль і запити від клієнтів безкоштовні
+              </span>
             </div>
           </div>
 
@@ -82,30 +82,30 @@ export default function Pro() {
 
           <div className="flex flex-col gap-3">
             <div className="noir-match-row" style={{ borderBottomColor: "var(--line)" }}>
-              <span className="k">Кураторських годин</span>
-              <span className="v">До 120</span>
+              <span className="k">Standard</span>
+              <span className="v accent">Безкоштовно</span>
             </div>
             <div className="noir-match-row" style={{ borderBottomColor: "var(--line)" }}>
-              <span className="k">Закритих запрошень</span>
-              <span className="v">12 / рік</span>
+              <span className="k">PRO — вище в пошуку</span>
+              <span className="v">990 ₴ / міс</span>
             </div>
             <div className="noir-match-row" style={{ borderBottomColor: "var(--line)" }}>
-              <span className="k">Smart Match</span>
-              <span className="v accent">Необмежено</span>
+              <span className="k">MAX — максимум замовлень</span>
+              <span className="v">2 490 ₴ / міс</span>
             </div>
             <div className="noir-match-row" style={{ border: 0 }}>
-              <span className="k">Скасування</span>
-              <span className="v">У будь-який момент</span>
+              <span className="k">Скасувати</span>
+              <span className="v">Будь-коли</span>
             </div>
           </div>
 
           <div className="flex gap-3 flex-wrap">
-            <Link href="/pro" className="btn-elegant">
-              <span>Оформити Pro</span>
+            <Link href="/register" className="btn-elegant">
+              <span>Додати&nbsp;себе в каталог</span>
               <span className="arr">→</span>
             </Link>
-            <Link href="/pro#details" className="btn-elegant-ghost">
-              <span>Дізнатись більше</span>
+            <Link href="/pro" className="btn-elegant-ghost">
+              <span>Порівняти&nbsp;тарифи</span>
               <span className="arr">↗</span>
             </Link>
           </div>

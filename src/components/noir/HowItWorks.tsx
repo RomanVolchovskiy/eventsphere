@@ -46,7 +46,7 @@ export default function HowItWorks() {
           <span className="arr">→</span>
         </Link>
         <Link href="/catalog" className="btn-elegant-ghost">
-          <span>Спершу&nbsp;подивитись каталог</span>
+          <span>Подивитись&nbsp;виконавців</span>
           <span className="arr">↗</span>
         </Link>
       </div>

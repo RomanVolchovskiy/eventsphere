@@ -23,11 +23,11 @@ export default function Match() {
         <div className="flex flex-col gap-6 max-w-[640px]">
           <span className="noir-label">Smart Match — підбір команди</span>
           <h2 className="noir-h2">
-            Команда за <span className="accent">сімдесят дві</span> секунди
+            Команда для свята <span className="accent">за хвилину</span>
           </h2>
           <p className="noir-lead">
-            Алгоритм перетинає 2 400 виконавців з вашим брифом і повертає
-            ансамбль. Куратор перевіряє кожну рекомендацію вручну.
+            Скажіть, яке свято, у якому місті, скільки гостей і скільки грошей.
+            Ми покажемо, кого взяти на кожну роль і скільки це коштуватиме.
           </p>
         </div>
       </div>
@@ -45,14 +45,14 @@ export default function Match() {
             </div>
           ))}
           <Link href="/smart-match" className="btn-elegant-ghost mt-2">
-            <span>Заповнити свій бриф</span>
+            <span>Розповісти про свято</span>
             <span className="arr">→</span>
           </Link>
         </div>
 
         <div className="noir-match-panel dark">
           <div className="flex items-center justify-between">
-            <span className="noir-label">Ансамбль · підбір редакції</span>
+            <span className="noir-label">Кого пропонуємо</span>
             <span className="noir-num">B.01</span>
           </div>
           <div className="noir-match-card">

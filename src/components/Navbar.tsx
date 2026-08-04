@@ -5,12 +5,14 @@ import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { Menu, X, MessageSquare, User, LogOut } from "lucide-react";
 
+// Порядок = пріоритет для гостя, який планує свято.
+// «Для виконавців» стоїть останнім — це інша аудиторія.
 const links = [
-  { href: "/catalog", label: "Каталог" },
-  { href: "#constructor", label: "Конструктор" },
-  { href: "/smart-match", label: "Smart Match" },
-  { href: "/daily", label: "Щодня" },
-  { href: "/pro", label: "Pro" },
+  { href: "/smart-match", label: "Підібрати команду" },
+  { href: "/catalog", label: "Виконавці" },
+  { href: "/#how", label: "Як це працює" },
+  { href: "/daily", label: "На щодень" },
+  { href: "/pro", label: "Для виконавців" },
 ];
 
 function BrandMark({ size = 52 }: { size?: number }) {
@@ -166,7 +168,7 @@ export default function Navbar() {
               увійти
             </Link>
             <Link href="/register" className="btn-elegant sm">
-              <span>Створити</span>
+              <span>Реєстрація</span>
               <span className="arr">→</span>
             </Link>
           </>
@@ -227,7 +229,7 @@ export default function Navbar() {
                     Увійти
                   </Link>
                   <Link href="/register" onClick={() => setOpen(false)} className="btn-elegant sm inline-flex w-fit">
-                    <span>Створити</span>
+                    <span>Реєстрація</span>
                     <span className="arr">→</span>
                   </Link>
                 </>

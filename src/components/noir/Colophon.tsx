@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const CREDITS = [
   ["Редакція", "ЄСвято Editorial · Київ"],
-  ["Заснована", "2026 · Edition №&nbsp;04"],
+  ["Працюємо з", "2026 року"],
   ["Куратори", "9 спеціалістів"],
   ["Виконавці", "2 414 у мережі"],
   ["Міста", "22 у фокусі"],
@@ -16,13 +16,12 @@ export default function Colophon() {
         <div className="flex flex-col gap-6 max-w-[720px]">
           <span className="noir-label">Про ЄСвято</span>
           <h2 className="noir-h2">
-            Не платформа.<br />
-            <span className="accent">Редакція</span> святкування.
+            Свято без<br />
+            <span className="accent">зайвого клопоту</span>
           </h2>
           <p className="noir-lead">
-            ЄСвято — не маркетплейс. Ми кураторська служба з
-            технологією під капотом. Алгоритми робимо ми. Рішення
-            ухвалюють люди. Звітність відкрита.
+            ЄСвято збирає перевірених виконавців в одному місці, щоб вам
+            не довелось шукати їх по знайомих і телефонувати кожному окремо.
           </p>
         </div>
       </div>
@@ -58,11 +57,9 @@ export default function Colophon() {
       </div>
 
       <div className="flex items-center justify-between mt-12 flex-wrap gap-6">
-        <span className="noir-num">
-          © 2026 — ЄСвято Editorial · Колофон цього випуску набрано шрифтом Fraunces
-        </span>
-        <Link href="#constructor" className="btn-elegant">
-          <span>Почати свою подію</span>
+        <span className="noir-num">© 2026 — ЄСвято</span>
+        <Link href="/smart-match" className="btn-elegant">
+          <span>Підібрати команду</span>
           <span className="arr">→</span>
         </Link>
       </div>

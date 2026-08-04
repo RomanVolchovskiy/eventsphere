@@ -34,7 +34,7 @@ export default function Hero() {
               <span className="arr">→</span>
             </Link>
             <Link href="/catalog" className="btn-elegant-ghost">
-              <span>Переглянути&nbsp;каталог</span>
+              <span>Подивитись&nbsp;виконавців</span>
               <span className="arr">↗</span>
             </Link>
           </div>

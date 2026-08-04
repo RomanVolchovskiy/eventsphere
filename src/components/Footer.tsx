@@ -55,11 +55,11 @@ export default function Footer() {
     <footer className="foot">
       <div className="foot-cta">
         <h2>
-          Готові <em>розпочати</em> свою подію?
+          Плануєте <em>свято</em>?
         </h2>
         <div className="foot-cta-actions">
-          <Link href="/register" className="btn-elegant">
-            <span>Створити акаунт</span>
+          <Link href="/smart-match" className="btn-elegant">
+            <span>Підібрати команду</span>
             <span className="arr">→</span>
           </Link>
           <Link href="/pro" className="btn-elegant-ghost">
@@ -78,24 +78,24 @@ export default function Footer() {
             </span>
           </Link>
           <p>
-            Редакція святкування. Один контакт замість десяти підрядників.
+            Виконавці для свят в одному місці. Знайдіть, домовтесь і
+            забронюйте — без десятка дзвінків.
           </p>
         </div>
         <div>
-          <h5>Клієнтам</h5>
-          <Link href="/catalog">Каталог</Link>
-          <Link href="/daily">Daily Index</Link>
-          <Link href="/planner">Планер</Link>
-          <Link href="/smart-match">Smart Match</Link>
+          <h5>Гостям</h5>
+          <Link href="/smart-match">Підібрати команду</Link>
+          <Link href="/catalog">Виконавці</Link>
+          <Link href="/planner">Мої свята</Link>
+          <Link href="/daily">На щодень</Link>
         </div>
         <div>
-          <h5>Бізнесу</h5>
-          <Link href="/pro">Pro Membership</Link>
-          <Link href="/pro">Виконавцям</Link>
-          <Link href="/pro">Партнерство</Link>
+          <h5>Виконавцям</h5>
+          <Link href="/register">Додати себе в каталог</Link>
+          <Link href="/pro">Тарифи</Link>
         </div>
         <div>
-          <h5>Редакція</h5>
+          <h5>Зв&apos;язок</h5>
           <a href="mailto:hello@eventsphere.ua">hello@eventsphere.ua</a>
           <a href="tel:+380440000000">+38 044 000 0000</a>
           <a href="#">@eventsphere.ua</a>
@@ -103,8 +103,7 @@ export default function Footer() {
       </div>
 
       <div className="foot-base">
-        <span className="mono">© 2026 ЄСвято Editorial · Made in Ukraine</span>
-        <span className="mono dim">Edition №&nbsp;04 — Noir</span>
+        <span className="mono">© 2026 ЄСвято · Зроблено в Україні</span>
       </div>
     </footer>
   );

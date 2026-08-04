@@ -11,28 +11,28 @@ const EVENTS = [
     mo: "Червня",
     title: "Корпоратив NUMA",
     sub: "Подвір'я Арсеналу · 1 200 гостей",
-    tag: "Sold-out",
+    tag: "Місць немає",
   },
   {
     d: "13",
     mo: "Червня",
     title: "Весілля у Кам'янці",
     sub: "Каньйон над Смотричем · 84 гостя",
-    tag: "Featured",
+    tag: "Готується",
   },
   {
     d: "20",
     mo: "Червня",
     title: "Літня резиденція DTEK",
     sub: "Стара ферма · приватний прийом",
-    tag: "Private",
+    tag: "Закрита",
   },
   {
     d: "27",
     mo: "Червня",
     title: "Vinyl Night vol. 12",
     sub: "Closer · 320 гостей",
-    tag: "Open",
+    tag: "Вхід вільний",
   },
 ];
 
@@ -43,11 +43,11 @@ export default function Calendar() {
         <div className="flex flex-col gap-6 max-w-[640px]">
           <span className="noir-label">Планувальник</span>
           <h2 className="noir-h2">
-            Червень 2026 — <span className="accent">чотири суботи</span>, які варто запам&apos;ятати
+            Усі ваші свята — <span className="accent">в одному календарі</span>
           </h2>
           <p className="noir-lead">
-            Жива карта подій редакції. Дати, місця, статуси, кількість
-            гостей — без перевідкривання дюжини вкладок.
+            Дати, місця, скільки гостей і що вже забронювали. Не треба
+            тримати це в голові чи в нотатках.
           </p>
         </div>
       </div>
