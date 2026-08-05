@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Sparkles, Eye, EyeOff, ArrowRight, User, Briefcase } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { VENDOR_CATEGORIES } from "@/lib/categories";
 
 type Role = "CLIENT" | "VENDOR";
 
@@ -26,10 +27,16 @@ export default function RegisterPage() {
     const email = (form.elements.namedItem("email") as HTMLInputElement).value;
     const phone = (form.elements.namedItem("phone") as HTMLInputElement).value;
     const password = (form.elements.namedItem("password") as HTMLInputElement).value;
-    const businessName =
-      role === "VENDOR"
-        ? (form.elements.namedItem("businessName") as HTMLInputElement).value
-        : undefined;
+    const isVendor = role === "VENDOR";
+    const businessName = isVendor
+      ? (form.elements.namedItem("businessName") as HTMLInputElement).value
+      : undefined;
+    const category = isVendor
+      ? (form.elements.namedItem("category") as HTMLSelectElement).value
+      : undefined;
+    const city = isVendor
+      ? (form.elements.namedItem("city") as HTMLInputElement).value
+      : undefined;
 
     const res = await fetch("/api/auth/register", {
       method: "POST",
@@ -41,6 +48,8 @@ export default function RegisterPage() {
         phone,
         role,
         businessName,
+        category,
+        city,
       }),
     });
 
@@ -63,7 +72,9 @@ export default function RegisterPage() {
     if (result?.error) {
       router.push("/login");
     } else {
-      router.push("/dashboard");
+      // Виконавця ведемо одразу дозаповнювати профіль — без опису й ціни
+      // він у каталозі не з'явиться.
+      router.push(isVendor ? "/vendor" : "/dashboard");
       router.refresh();
     }
   }
@@ -142,16 +153,60 @@ export default function RegisterPage() {
             </div>
 
             {role === "VENDOR" && (
-              <div>
-                <label className="block text-sm text-[var(--text-muted)] mb-2">Назва бізнесу</label>
-                <input
-                  name="businessName"
-                  type="text"
-                  required
-                  placeholder="Crystal Hall"
-                  className="w-full bg-[var(--dark)] border border-[var(--dark-border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--gold)] transition-colors text-sm"
-                />
-              </div>
+              <>
+                <div>
+                  <label className="block text-sm text-[var(--text-muted)] mb-2">
+                    Назва бізнесу
+                  </label>
+                  <input
+                    name="businessName"
+                    type="text"
+                    required
+                    placeholder="Наприклад: Студія Промінь"
+                    className="w-full bg-[var(--dark)] border border-[var(--dark-border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--gold)] transition-colors text-sm"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm text-[var(--text-muted)] mb-2">
+                      Що ви робите
+                    </label>
+                    <select
+                      name="category"
+                      required
+                      defaultValue=""
+                      className="w-full bg-[var(--dark)] border border-[var(--dark-border)] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[var(--gold)] transition-colors text-sm"
+                    >
+                      <option value="" disabled>
+                        Оберіть
+                      </option>
+                      {VENDOR_CATEGORIES.map((c) => (
+                        <option key={c.value} value={c.value}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-[var(--text-muted)] mb-2">
+                      Місто
+                    </label>
+                    <input
+                      name="city"
+                      type="text"
+                      required
+                      placeholder="Київ"
+                      className="w-full bg-[var(--dark)] border border-[var(--dark-border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--gold)] transition-colors text-sm"
+                    />
+                  </div>
+                </div>
+
+                <p className="text-[var(--text-muted)] text-xs -mt-1">
+                  Решту — опис, ціни, фото — додасте в кабінеті після реєстрації.
+                  Профіль з&apos;явиться в каталозі, коли заповните опис і ціну.
+                </p>
+              </>
             )}
 
             <div>

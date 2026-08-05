@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { getDb } from "@/lib/db";
 import { rateLimit, getClientIp } from "@/lib/ratelimit";
+import { isEventCategory } from "@/lib/categories";
 
 export async function POST(req: NextRequest) {
   // Rate limit: 5 registrations per IP per 15 minutes
@@ -23,10 +24,23 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { name, email, password, role, phone, businessName } = body;
+  const { name, email, password, role, phone, businessName, category, city } = body;
 
   if (!name || !email || !password) {
     return NextResponse.json({ error: "Заповніть усі обов'язкові поля" }, { status: 400 });
+  }
+
+  const isVendor = role === "VENDOR";
+  if (isVendor) {
+    if (!businessName?.trim()) {
+      return NextResponse.json({ error: "Вкажіть назву бізнесу" }, { status: 400 });
+    }
+    if (!isEventCategory(category)) {
+      return NextResponse.json({ error: "Оберіть напрям роботи" }, { status: 400 });
+    }
+    if (!city?.trim()) {
+      return NextResponse.json({ error: "Вкажіть місто" }, { status: 400 });
+    }
   }
 
   if (password.length < 8) {
@@ -52,18 +66,18 @@ export async function POST(req: NextRequest) {
       name,
       email,
       passwordHash,
-      role: role === "VENDOR" ? "VENDOR" : "CLIENT",
+      role: isVendor ? "VENDOR" : "CLIENT",
       phone: phone || null,
     },
   });
 
-  if (role === "VENDOR" && businessName) {
+  if (isVendor) {
     await db.vendor.create({
       data: {
         userId: user.id,
-        businessName,
-        category: "VENUE",
-        city: "",
+        businessName: businessName.trim(),
+        category,
+        city: city.trim(),
       },
     });
   }

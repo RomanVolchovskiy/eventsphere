@@ -78,7 +78,14 @@ export default async function CatalogPage({
 
   const db = getDb();
   const vendors: VendorCardData[] = await db.vendor.findMany({
-    where: activeCat.enum ? { category: activeCat.enum } : undefined,
+    // Щойно зареєстрований виконавець ще не заповнив профіль — його картка
+    // була б порожньою. Показуємо лише тих, у кого є місто й опис
+    // (та сама умова у кабінеті: src/app/vendor/page.tsx isListed).
+    where: {
+      city: { not: "" },
+      description: { not: null },
+      ...(activeCat.enum ? { category: activeCat.enum } : {}),
+    },
     orderBy: [{ rating: "desc" }, { reviewsCount: "desc" }],
     select: {
       id: true,

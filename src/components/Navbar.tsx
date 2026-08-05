@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { Menu, X, MessageSquare, User, LogOut } from "lucide-react";
+import { Menu, X, MessageSquare, User, LogOut, Briefcase } from "lucide-react";
 
 // Порядок = пріоритет для гостя, який планує свято.
 // «Для виконавців» стоїть останнім — це інша аудиторія.
@@ -142,6 +142,15 @@ export default function Navbar() {
                   >
                     <User className="w-3.5 h-3.5" strokeWidth={1.5} /> Кабінет
                   </Link>
+                  {session.user.role === "VENDOR" && (
+                    <Link
+                      href="/vendor"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-[13px] text-[var(--muted)] hover:text-[var(--ink)] hover:bg-white/5 transition-colors"
+                    >
+                      <Briefcase className="w-3.5 h-3.5" strokeWidth={1.5} /> Мій профіль
+                    </Link>
+                  )}
                   <Link
                     href="/messages"
                     onClick={() => setUserMenuOpen(false)}
@@ -210,6 +219,11 @@ export default function Navbar() {
                   <Link href="/dashboard" onClick={() => setOpen(false)} className="text-[var(--ink)] py-2 text-sm">
                     Кабінет
                   </Link>
+                  {session.user.role === "VENDOR" && (
+                    <Link href="/vendor" onClick={() => setOpen(false)} className="text-[var(--muted)] py-2 text-sm">
+                      Мій профіль
+                    </Link>
+                  )}
                   <Link href="/messages" onClick={() => setOpen(false)} className="text-[var(--muted)] py-2 text-sm">
                     Повідомлення
                   </Link>

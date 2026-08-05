@@ -87,6 +87,8 @@ export async function POST(request: NextRequest) {
     // Місто не фільтруємо в SQL: якщо в місті користувача виконавця під роль
     // немає, краще запропонувати виїзний варіант зі зниженим збігом, ніж нічого.
     candidates = await db.vendor.findMany({
+      // Та сама умова, що й у каталозі: незаповнений профіль не пропонуємо.
+      where: { city: { not: "" }, description: { not: null } },
       select: {
         id: true,
         businessName: true,
