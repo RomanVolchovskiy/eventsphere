@@ -21,7 +21,7 @@ export default function Match() {
     <section className="noir-section" id="smart-match">
       <div className="flex items-end justify-between gap-8 flex-wrap mb-8">
         <div className="flex flex-col gap-6 max-w-[640px]">
-          <span className="noir-label">Smart Match — підбір команди</span>
+          <span className="noir-label">Підбір команди</span>
           <h2 className="noir-h2">
             Команда для свята <span className="accent">за хвилину</span>
           </h2>
@@ -35,7 +35,7 @@ export default function Match() {
       <div className="noir-match-frame">
         <div className="noir-match-panel">
           <div className="flex items-center justify-between">
-            <span className="noir-label">Бриф клієнта</span>
+            <span className="noir-label">Що ви вказуєте · приклад</span>
             <span className="noir-num">A.01</span>
           </div>
           {BRIEF.map(([k, v]) => (
@@ -56,9 +56,9 @@ export default function Match() {
             <span className="noir-num">B.01</span>
           </div>
           <div className="noir-match-card">
-            <span className="noir-num">Match score</span>
+            <span className="noir-num">Збіг</span>
             <span className="noir-match-score">98</span>
-            <span className="noir-num">з 100 — вище мінімального порогу 84</span>
+            <span className="noir-num">зі 100 — наскільки виконавець підходить</span>
           </div>
           {RESULT.map(([k, v]) => (
             <div className="noir-match-row" key={k}>

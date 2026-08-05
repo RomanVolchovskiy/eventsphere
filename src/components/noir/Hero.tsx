@@ -40,28 +40,29 @@ export default function Hero() {
           </div>
         </div>
 
+        {/* Тут раніше стояли вигадані цифри (2 400 виконавців, 18K заходів,
+            22 міста) — вони розсипались одразу, щойно людина відкривала каталог.
+            Замінено на твердження, які правдиві незалежно від розміру каталогу
+            і які можна перевірити в коді: вільний режим бронювання, чат
+            (/api/conversations), 5 значень EventCategory. */}
         <div className="noir-hero-right">
           <div className="noir-stat">
             <span className="noir-stat-value">
-              2&nbsp;400<span className="unit">+</span>
+              0<span className="unit">&nbsp;₴</span>
             </span>
-            <span className="noir-stat-label">Перевірених виконавців</span>
+            <span className="noir-stat-label">Передоплата за бронювання</span>
+          </div>
+          <div className="noir-stat">
+            <span className="noir-stat-value">5</span>
+            <span className="noir-stat-label">
+              Напрямки — від залу до декору
+            </span>
           </div>
           <div className="noir-stat">
             <span className="noir-stat-value">
-              18<span className="unit">K</span>
+              1<span className="unit">&nbsp;хв</span>
             </span>
-            <span className="noir-stat-label">Заходів на рік</span>
-          </div>
-          <div className="noir-stat">
-            <span className="noir-stat-value">
-              4.9<span className="unit">★</span>
-            </span>
-            <span className="noir-stat-label">Середня оцінка клієнтів</span>
-          </div>
-          <div className="noir-stat">
-            <span className="noir-stat-value">22</span>
-            <span className="noir-stat-label">Міста України</span>
+            <span className="noir-stat-label">На підбір команди</span>
           </div>
         </div>
       </div>

@@ -41,7 +41,7 @@ export default function Calendar() {
     <section className="noir-section" id="planner">
       <div className="flex items-end justify-between gap-8 flex-wrap mb-8">
         <div className="flex flex-col gap-6 max-w-[640px]">
-          <span className="noir-label">Планувальник</span>
+          <span className="noir-label">Планувальник · приклад</span>
           <h2 className="noir-h2">
             Усі ваші свята — <span className="accent">в одному календарі</span>
           </h2>
@@ -92,9 +92,8 @@ export default function Calendar() {
             ))}
           </div>
           <div className="noir-meta mt-4">
-            <span>4 події</span>
-            <span>2 304 гостя</span>
-            <span>16 виконавців</span>
+            <span>Приклад вигляду</span>
+            <span>Ваші свята будуть тут</span>
           </div>
         </div>
 

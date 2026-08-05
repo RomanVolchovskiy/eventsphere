@@ -1275,6 +1275,7 @@ em {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ash);
+  line-height: 1.5;
 }
 
 /* Featured grid (magazine-style asymmetric) */
