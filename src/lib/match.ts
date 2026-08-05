@@ -86,27 +86,35 @@ export type MatchInput = {
   budget: number;
 };
 
-export type Match = {
-  role: string;
-  category: EventCategory;
-  vendor: {
-    id: string;
-    name: string;
-    city: string;
-    rating: number;
-    reviewsCount: number;
-    priceFrom: number;
-    subscription: SubscriptionTier;
-    isVerified: boolean;
-    /** Відсоток збігу за фактичними ознаками — тариф на нього НЕ впливає. */
-    matchScore: number;
-  };
+export type MatchVendor = {
+  id: string;
+  name: string;
+  city: string;
+  rating: number;
+  reviewsCount: number;
+  priceFrom: number;
+  subscription: SubscriptionTier;
+  isVerified: boolean;
+  /** Відсоток збігу за фактичними ознаками — тариф на нього НЕ впливає. */
+  matchScore: number;
+};
+
+/** Один варіант на роль — і рекомендований, і ті, на які можна замінити. */
+export type MatchOption = {
+  vendor: MatchVendor;
   /** Кошторис ролі: для кейтерингу — ціна × гості, інакше — стартова ціна. */
   estimatedCost: number;
   pricingNote: string | null;
+  reason: string;
+};
+
+export type Match = MatchOption & {
+  role: string;
+  category: EventCategory;
   /** Виділений на цю роль бюджет. */
   allocated: number;
-  reason: string;
+  /** Наступні за оцінкою виконавці цієї ролі — для заміни у видачі. */
+  alternatives: MatchOption[];
 };
 
 export type MatchOutcome = {
@@ -236,7 +244,36 @@ function buildReason(signals: string[]): string {
   return sentence.charAt(0).toUpperCase() + sentence.slice(1) + ".";
 }
 
-/** Підбирає по одному найкращому виконавцю на кожну релевантну роль. */
+/** Скільки варіантів на заміну віддавати понад рекомендований. */
+const ALTERNATIVES_PER_ROLE = 3;
+
+function toOption(
+  candidate: MatchCandidate,
+  fit: number,
+  signals: string[],
+  input: MatchInput,
+): MatchOption {
+  return {
+    vendor: {
+      id: candidate.id,
+      name: candidate.businessName,
+      city: candidate.city,
+      rating: candidate.rating,
+      reviewsCount: candidate.reviewsCount,
+      priceFrom: candidate.priceFrom ?? 0,
+      subscription: candidate.subscription,
+      isVerified: candidate.isVerified,
+      matchScore: Math.round(fit * 100),
+    },
+    estimatedCost: Math.round(estimateCost(candidate, input.guestsCount)),
+    pricingNote: PER_GUEST_CATEGORIES.has(candidate.category)
+      ? `${(candidate.priceFrom ?? 0).toLocaleString("uk-UA")} ₴ × ${input.guestsCount} гостей`
+      : null,
+    reason: buildReason(signals),
+  };
+}
+
+/** Підбирає найкращого виконавця на кожну релевантну роль + варіанти на заміну. */
 export function buildMatches(candidates: MatchCandidate[], input: MatchInput): MatchOutcome {
   const allocation = allocateBudget(input.budget, input.eventType, input.guestsCount);
   const matches: Match[] = [];
@@ -249,31 +286,20 @@ export function buildMatches(candidates: MatchCandidate[], input: MatchInput): M
       continue;
     }
 
-    const best = pool
+    // Сортуємо за rank (з урахуванням тарифу), показуємо fit — щоб підняття
+    // платних партнерів не малювало їм кращий відсоток збігу.
+    const [best, ...rest] = pool
       .map((candidate) => ({ candidate, ...scoreCandidate(candidate, input, allocated) }))
-      .sort((a, b) => b.rank - a.rank)[0];
+      .sort((a, b) => b.rank - a.rank);
 
-    const cost = estimateCost(best.candidate, input.guestsCount);
     matches.push({
       role: ROLE_LABEL[category],
       category,
-      vendor: {
-        id: best.candidate.id,
-        name: best.candidate.businessName,
-        city: best.candidate.city,
-        rating: best.candidate.rating,
-        reviewsCount: best.candidate.reviewsCount,
-        priceFrom: best.candidate.priceFrom ?? 0,
-        subscription: best.candidate.subscription,
-        isVerified: best.candidate.isVerified,
-        matchScore: Math.round(best.fit * 100),
-      },
-      estimatedCost: Math.round(cost),
-      pricingNote: PER_GUEST_CATEGORIES.has(category)
-        ? `${(best.candidate.priceFrom ?? 0).toLocaleString("uk-UA")} ₴ × ${input.guestsCount} гостей`
-        : null,
       allocated: Math.round(allocated),
-      reason: buildReason(best.signals),
+      ...toOption(best.candidate, best.fit, best.signals, input),
+      alternatives: rest
+        .slice(0, ALTERNATIVES_PER_ROLE)
+        .map((r) => toOption(r.candidate, r.fit, r.signals, input)),
     });
   }
 

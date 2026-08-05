@@ -1,26 +1,35 @@
 "use client";
 
-import { useState } from "react";
-import { Sparkles, Star, ArrowRight, Users, DollarSign, MapPin, Loader2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import {
+  Sparkles, Star, ArrowRight, Users, DollarSign, MapPin, Loader2,
+  Repeat, Check, X,
+} from "lucide-react";
 
-type MatchResult = {
-  role: string;
-  category: string;
-  vendor: {
-    id: string;
-    name: string;
-    city: string;
-    rating: number;
-    reviewsCount: number;
-    priceFrom: number;
-    subscription: "STANDARD" | "PRO" | "MAX";
-    isVerified: boolean;
-    matchScore: number;
-  };
+type MatchVendor = {
+  id: string;
+  name: string;
+  city: string;
+  rating: number;
+  reviewsCount: number;
+  priceFrom: number;
+  subscription: "STANDARD" | "PRO" | "MAX";
+  isVerified: boolean;
+  matchScore: number;
+};
+
+type MatchOption = {
+  vendor: MatchVendor;
   estimatedCost: number;
   pricingNote: string | null;
-  allocated: number;
   reason: string;
+};
+
+type MatchResult = MatchOption & {
+  role: string;
+  category: string;
+  allocated: number;
+  alternatives: MatchOption[];
 };
 
 type ApiResponse = {
@@ -41,6 +50,35 @@ export default function SmartMatchPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Заміна виконавця: для кожної ролі — індекс обраного варіанта
+  // (0 = рекомендований, далі alternatives). Яка роль зараз розгорнута.
+  const [picked, setPicked] = useState<Record<string, number>>({});
+  const [openRole, setOpenRole] = useState<string | null>(null);
+
+  /** Усі варіанти ролі одним списком: рекомендований + альтернативи. */
+  function optionsOf(m: MatchResult): MatchOption[] {
+    const { role, category, allocated, alternatives, ...recommended } = m;
+    void role; void category; void allocated;
+    return [recommended, ...alternatives];
+  }
+
+  function chosenOf(m: MatchResult): MatchOption {
+    const opts = optionsOf(m);
+    return opts[picked[m.category] ?? 0] ?? opts[0];
+  }
+
+  // Кошторис перераховується від того, що людина обрала, а не від
+  // початкової відповіді сервера.
+  const totals = useMemo(() => {
+    if (!result) return null;
+    const total = result.matches.reduce((sum, m) => {
+      const opts = optionsOf(m);
+      const opt = opts[picked[m.category] ?? 0] ?? opts[0];
+      return sum + opt.estimatedCost;
+    }, 0);
+    return { total, ok: total <= result.budget };
+  }, [result, picked]);
 
   const [form, setForm] = useState({
     eventType: "",
@@ -69,6 +107,8 @@ export default function SmartMatchPage() {
         return;
       }
       setResult(data as ApiResponse);
+      setPicked({});
+      setOpenRole(null);
       setStep(4);
     } catch {
       setError("Немає зв'язку з сервером. Перевірте інтернет і спробуйте ще раз.");
@@ -337,71 +377,165 @@ export default function SmartMatchPage() {
             </div>
 
             <div className="space-y-4">
-              {result.matches.map((m) => (
-                <div
-                  key={m.category}
-                  className="bg-[var(--dark-card)] border border-[var(--dark-border)] rounded-2xl p-5 hover:border-[var(--gold)]/50 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <div>
-                      <p className="text-[var(--gold)] text-xs font-medium mb-1">{m.role}</p>
-                      <h3 className="text-white font-semibold flex items-center gap-2">
-                        {m.vendor.name}
-                        {m.vendor.subscription !== "STANDARD" && (
-                          <span className="text-[10px] uppercase tracking-wide border border-[var(--gold)]/40 text-[var(--gold)] px-1.5 py-0.5 rounded">
-                            {m.vendor.subscription}
+              {result.matches.map((m) => {
+                const opts = optionsOf(m);
+                const chosen = chosenOf(m);
+                const chosenIndex = picked[m.category] ?? 0;
+                const isOpen = openRole === m.category;
+                const swapped = chosenIndex !== 0;
+
+                return (
+                  <div
+                    key={m.category}
+                    className="bg-[var(--dark-card)] border border-[var(--dark-border)] rounded-2xl p-5 hover:border-[var(--gold)]/50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <div>
+                        <p className="text-[var(--gold)] text-xs font-medium mb-1">
+                          {m.role}
+                          {swapped && (
+                            <span className="text-[var(--text-muted)] font-normal">
+                              {" "}· замінено вами
+                            </span>
+                          )}
+                        </p>
+                        <h3 className="text-white font-semibold flex items-center gap-2">
+                          {chosen.vendor.name}
+                          {chosen.vendor.subscription !== "STANDARD" && (
+                            <span className="text-[10px] uppercase tracking-wide border border-[var(--gold)]/40 text-[var(--gold)] px-1.5 py-0.5 rounded">
+                              {chosen.vendor.subscription}
+                            </span>
+                          )}
+                        </h3>
+                        <p className="text-[var(--text-muted)] text-xs mt-1 flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {chosen.vendor.city}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="text-xs bg-[var(--gold)]/10 text-[var(--gold)] px-2 py-1 rounded-full">
+                          {chosen.vendor.matchScore}% збіг
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-[var(--text-muted)] text-sm mb-3">{chosen.reason}</p>
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-3.5 h-3.5 text-[var(--gold)] fill-[var(--gold)]" />
+                          <span className="text-white text-sm">
+                            {chosen.vendor.reviewsCount > 0
+                              ? chosen.vendor.rating.toFixed(1)
+                              : "—"}
+                          </span>
+                          <span className="text-[var(--text-muted)] text-xs">
+                            ({chosen.vendor.reviewsCount})
+                          </span>
+                        </div>
+                        <span className="text-white text-sm">
+                          ≈ {chosen.estimatedCost.toLocaleString("uk-UA")} ₴
+                        </span>
+                        {chosen.pricingNote && (
+                          <span className="text-[var(--text-muted)] text-xs">
+                            {chosen.pricingNote}
                           </span>
                         )}
-                      </h3>
-                      <p className="text-[var(--text-muted)] text-xs mt-1 flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {m.vendor.city}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <div className="text-xs bg-[var(--gold)]/10 text-[var(--gold)] px-2 py-1 rounded-full">
-                        {m.vendor.matchScore}% збіг
                       </div>
+                      <a
+                        href={`/catalog/${chosen.vendor.id}`}
+                        className="text-[var(--gold)] text-sm hover:underline flex items-center gap-1"
+                      >
+                        Профіль <ArrowRight className="w-3 h-3" />
+                      </a>
                     </div>
-                  </div>
-                  <p className="text-[var(--text-muted)] text-sm mb-3">{m.reason}</p>
-                  <div className="flex items-center justify-between gap-3 flex-wrap">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-3.5 h-3.5 text-[var(--gold)] fill-[var(--gold)]" />
-                        <span className="text-white text-sm">
-                          {m.vendor.reviewsCount > 0 ? m.vendor.rating.toFixed(1) : "—"}
-                        </span>
-                        <span className="text-[var(--text-muted)] text-xs">
-                          ({m.vendor.reviewsCount})
-                        </span>
-                      </div>
-                      <span className="text-white text-sm">
-                        ≈ {m.estimatedCost.toLocaleString("uk-UA")} ₴
+
+                    <div className="mt-3 pt-3 border-t border-[var(--dark-border)] flex items-center justify-between gap-3 text-xs flex-wrap">
+                      <span className="text-[var(--text-muted)]">
+                        Бюджет на роль: {m.allocated.toLocaleString("uk-UA")} ₴
                       </span>
-                      {m.pricingNote && (
-                        <span className="text-[var(--text-muted)] text-xs">{m.pricingNote}</span>
-                      )}
+                      <span
+                        className={
+                          chosen.estimatedCost <= m.allocated
+                            ? "text-green-400"
+                            : "text-yellow-400"
+                        }
+                      >
+                        {chosen.estimatedCost <= m.allocated
+                          ? `економія ${(m.allocated - chosen.estimatedCost).toLocaleString("uk-UA")} ₴`
+                          : `+${(chosen.estimatedCost - m.allocated).toLocaleString("uk-UA")} ₴ понад`}
+                      </span>
                     </div>
-                    <a
-                      href={`/catalog/${m.vendor.id}`}
-                      className="text-[var(--gold)] text-sm hover:underline flex items-center gap-1"
-                    >
-                      Профіль <ArrowRight className="w-3 h-3" />
-                    </a>
+
+                    {/* Заміна виконавця на цю роль */}
+                    {opts.length > 1 ? (
+                      <div className="mt-3">
+                        <button
+                          onClick={() => setOpenRole(isOpen ? null : m.category)}
+                          className="flex items-center gap-2 text-[var(--gold)] text-sm hover:underline"
+                        >
+                          {isOpen ? <X className="w-3.5 h-3.5" /> : <Repeat className="w-3.5 h-3.5" />}
+                          {isOpen
+                            ? "Згорнути"
+                            : `Замінити виконавця (${opts.length - 1} ${
+                                opts.length - 1 === 1 ? "варіант" : "варіанти"
+                              })`}
+                        </button>
+
+                        {isOpen && (
+                          <div className="mt-3 space-y-2">
+                            {opts.map((o, i) => {
+                              const active = i === chosenIndex;
+                              return (
+                                <button
+                                  key={o.vendor.id}
+                                  onClick={() => {
+                                    setPicked((p) => ({ ...p, [m.category]: i }));
+                                    setOpenRole(null);
+                                  }}
+                                  className={`w-full text-left rounded-xl border p-3 transition-colors ${
+                                    active
+                                      ? "border-[var(--gold)] bg-[var(--gold)]/5"
+                                      : "border-[var(--dark-border)] bg-[var(--dark)] hover:border-[var(--gold)]/50"
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between gap-3">
+                                    <div className="min-w-0">
+                                      <p className="text-white text-sm font-medium flex items-center gap-2">
+                                        {active && (
+                                          <Check className="w-3.5 h-3.5 text-[var(--gold)] flex-shrink-0" />
+                                        )}
+                                        <span className="truncate">{o.vendor.name}</span>
+                                        {i === 0 && (
+                                          <span className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] flex-shrink-0">
+                                            рекомендований
+                                          </span>
+                                        )}
+                                      </p>
+                                      <p className="text-[var(--text-muted)] text-xs mt-0.5 truncate">
+                                        {o.vendor.city} · {o.vendor.matchScore}% збіг ·{" "}
+                                        {o.vendor.reviewsCount > 0
+                                          ? `${o.vendor.rating.toFixed(1)}★ (${o.vendor.reviewsCount})`
+                                          : "без відгуків"}
+                                      </p>
+                                    </div>
+                                    <span className="text-white text-sm flex-shrink-0">
+                                      ≈ {o.estimatedCost.toLocaleString("uk-UA")} ₴
+                                    </span>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="mt-3 text-[var(--text-muted)] text-xs">
+                        Інших виконавців на цю роль у каталозі поки немає.
+                      </p>
+                    )}
                   </div>
-                  <div className="mt-3 pt-3 border-t border-[var(--dark-border)] flex items-center justify-between text-xs">
-                    <span className="text-[var(--text-muted)]">
-                      Бюджет на роль: {m.allocated.toLocaleString("uk-UA")} ₴
-                    </span>
-                    <span className={m.estimatedCost <= m.allocated ? "text-green-400" : "text-yellow-400"}>
-                      {m.estimatedCost <= m.allocated
-                        ? `економія ${(m.allocated - m.estimatedCost).toLocaleString("uk-UA")} ₴`
-                        : `+${(m.estimatedCost - m.allocated).toLocaleString("uk-UA")} ₴ понад`}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {result.missingRoles.length > 0 && (
@@ -412,19 +546,32 @@ export default function SmartMatchPage() {
               </p>
             )}
 
-            {result.matches.length > 0 && (
-              <div className={`rounded-2xl p-5 border ${result.budgetOk ? "bg-green-400/5 border-green-400/20" : "bg-yellow-400/5 border-yellow-400/20"}`}>
-                <div className="flex items-center justify-between">
+            {result.matches.length > 0 && totals && (
+              <div
+                className={`rounded-2xl p-5 border ${
+                  totals.ok
+                    ? "bg-green-400/5 border-green-400/20"
+                    : "bg-yellow-400/5 border-yellow-400/20"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className={`text-sm font-medium mb-1 ${result.budgetOk ? "text-green-400" : "text-yellow-400"}`}>
-                      {result.budgetOk ? "Вписується у бюджет" : "Дещо вище бюджету"}
+                    <p
+                      className={`text-sm font-medium mb-1 ${
+                        totals.ok ? "text-green-400" : "text-yellow-400"
+                      }`}
+                    >
+                      {totals.ok ? "Вписується у бюджет" : "Дещо вище бюджету"}
                     </p>
                     <p className="text-[var(--text-muted)] text-xs">
                       Орієнтовна вартість команди з {result.budget.toLocaleString("uk-UA")} ₴
+                      {totals.ok
+                        ? ` · залишається ${(result.budget - totals.total).toLocaleString("uk-UA")} ₴`
+                        : ` · перевищення ${(totals.total - result.budget).toLocaleString("uk-UA")} ₴`}
                     </p>
                   </div>
-                  <p className="text-white font-bold text-xl">
-                    {result.totalEstimate.toLocaleString("uk-UA")} ₴
+                  <p className="text-white font-bold text-xl flex-shrink-0">
+                    {totals.total.toLocaleString("uk-UA")} ₴
                   </p>
                 </div>
               </div>
