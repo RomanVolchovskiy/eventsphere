@@ -58,12 +58,12 @@ export default function LoginPage() {
               <Sparkles className="w-5 h-5 text-black" />
             </div>
             <span className="text-white font-semibold text-xl">
-              Event<span className="text-[var(--gold)]">Sphere</span>
+              <span className="text-[var(--gold)]">Є</span>Свято
             </span>
           </Link>
           <h1 className="text-2xl font-bold text-white mb-2">З поверненням</h1>
           <p className="text-[var(--text-muted)] text-sm">
-            Увійдіть, щоб продовжити планування
+            Увійдіть, щоб бачити свої свята й бронювання
           </p>
         </div>
 
@@ -146,9 +146,6 @@ export default function LoginPage() {
             Продовжити з Google
           </button>
 
-          <p className="text-center text-xs text-[var(--text-muted)] mt-4">
-            Тест: test@eventsphere.com / password123
-          </p>
         </div>
 
         <p className="text-center text-sm text-[var(--text-muted)] mt-6">

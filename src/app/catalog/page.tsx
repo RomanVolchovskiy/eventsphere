@@ -106,9 +106,9 @@ export default async function CatalogPage({
       {/* Header */}
       <div className="bg-[var(--dark-card)] border-b border-[var(--dark-border)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <h1 className="text-3xl font-bold text-white mb-2">Енциклопедія свят</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">Виконавці</h1>
           <p className="text-[var(--text-muted)] mb-8">
-            Знайдіть ідеального виконавця для вашого заходу серед верифікованих партнерів
+            Зал, кейтеринг, фото, ведучий, декор — оберіть, хто зробить ваше свято
           </p>
 
           {/* Search bar */}

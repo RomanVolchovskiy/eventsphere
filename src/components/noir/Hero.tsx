@@ -48,7 +48,7 @@ export default function Hero() {
         <div className="noir-hero-right">
           <div className="noir-stat">
             <span className="noir-stat-value">
-              0<span className="unit">&nbsp;₴</span>
+              0<span className="unit">грн</span>
             </span>
             <span className="noir-stat-label">Передоплата за бронювання</span>
           </div>
@@ -60,7 +60,7 @@ export default function Hero() {
           </div>
           <div className="noir-stat">
             <span className="noir-stat-value">
-              1<span className="unit">&nbsp;хв</span>
+              1<span className="unit">хв</span>
             </span>
             <span className="noir-stat-label">На підбір команди</span>
           </div>

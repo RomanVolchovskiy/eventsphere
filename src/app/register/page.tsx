@@ -88,12 +88,12 @@ export default function RegisterPage() {
               <Sparkles className="w-5 h-5 text-black" />
             </div>
             <span className="text-white font-semibold text-xl">
-              Event<span className="text-[var(--gold)]">Sphere</span>
+              <span className="text-[var(--gold)]">Є</span>Свято
             </span>
           </Link>
           <h1 className="text-2xl font-bold text-white mb-2">Створіть акаунт</h1>
           <p className="text-[var(--text-muted)] text-sm">
-            Приєднуйтесь до тисяч організаторів та виконавців
+            Плануєте свято або пропонуєте послуги — вам сюди
           </p>
         </div>
 
