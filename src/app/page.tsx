@@ -1,25 +1,28 @@
-import Hero from "@/components/noir/Hero";
-import HowItWorks from "@/components/noir/HowItWorks";
-import Featured from "@/components/noir/Featured";
-import Constructor from "@/components/noir/Constructor";
-import Calendar from "@/components/noir/Calendar";
-import Match from "@/components/noir/Match";
-import Index from "@/components/noir/Index";
-import Pro from "@/components/noir/Pro";
-import Colophon from "@/components/noir/Colophon";
+import Hero from "@/components/afisha/Hero";
+import Acts from "@/components/afisha/Acts";
+import PosterWall from "@/components/afisha/PosterWall";
+import Program from "@/components/afisha/Program";
+import Repertoire from "@/components/afisha/Repertoire";
+import Kasa from "@/components/afisha/Kasa";
+import Today from "@/components/afisha/Today";
+import Backstage from "@/components/afisha/Backstage";
+import Credits from "@/components/afisha/Credits";
 
+// Едиція «Афіша»: театральна подієва афіша. Попередня едиція (Editorial
+// Noir) лишається в src/components/noir/ — щоб повернутись, поверніть
+// імпорти noir/* і приберіть обгортку .afisha.
 export default function Home() {
   return (
-    <>
+    <div className="afisha">
       <Hero />
-      <HowItWorks />
-      <Featured />
-      <Constructor />
-      <Calendar />
-      <Match />
-      <Index />
-      <Pro />
-      <Colophon />
-    </>
+      <Acts />
+      <PosterWall />
+      <Program />
+      <Repertoire />
+      <Kasa />
+      <Today />
+      <Backstage />
+      <Credits />
+    </div>
   );
 }

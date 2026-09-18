@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -37,7 +37,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError("Невірний email або пароль");
       } else {
-        router.push("/dashboard");
+        router.push("/me");
         router.refresh();
       }
     } catch (err) {
@@ -134,7 +134,7 @@ export default function LoginPage() {
           </div>
 
           <button
-            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+            onClick={() => signIn("google", { callbackUrl: "/me" })}
             className="w-full bg-[var(--dark)] border border-[var(--dark-border)] text-white font-medium py-3 rounded-xl hover:border-[var(--gold)] transition-colors flex items-center justify-center gap-3 text-sm"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">

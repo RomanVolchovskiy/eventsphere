@@ -136,19 +136,19 @@ export default function Navbar() {
                   }}
                 >
                   <Link
-                    href="/dashboard"
+                    href="/me"
                     onClick={() => setUserMenuOpen(false)}
                     className="flex items-center gap-3 px-4 py-2.5 text-[13px] text-[var(--muted)] hover:text-[var(--ink)] hover:bg-white/5 transition-colors"
                   >
-                    <User className="w-3.5 h-3.5" strokeWidth={1.5} /> Кабінет
+                    <User className="w-3.5 h-3.5" strokeWidth={1.5} /> Моя сторінка
                   </Link>
                   {session.user.role === "VENDOR" && (
                     <Link
-                      href="/vendor"
+                      href="/me?tab=vendor"
                       onClick={() => setUserMenuOpen(false)}
                       className="flex items-center gap-3 px-4 py-2.5 text-[13px] text-[var(--muted)] hover:text-[var(--ink)] hover:bg-white/5 transition-colors"
                     >
-                      <Briefcase className="w-3.5 h-3.5" strokeWidth={1.5} /> Мій профіль
+                      <Briefcase className="w-3.5 h-3.5" strokeWidth={1.5} /> Мої замовлення
                     </Link>
                   )}
                   <Link
@@ -216,12 +216,12 @@ export default function Navbar() {
             <div className="border-t border-[var(--line)] mt-2 pt-3 flex flex-col gap-2">
               {session ? (
                 <>
-                  <Link href="/dashboard" onClick={() => setOpen(false)} className="text-[var(--ink)] py-2 text-sm">
-                    Кабінет
+                  <Link href="/me" onClick={() => setOpen(false)} className="text-[var(--ink)] py-2 text-sm">
+                    Моя сторінка
                   </Link>
                   {session.user.role === "VENDOR" && (
-                    <Link href="/vendor" onClick={() => setOpen(false)} className="text-[var(--muted)] py-2 text-sm">
-                      Мій профіль
+                    <Link href="/me?tab=vendor" onClick={() => setOpen(false)} className="text-[var(--muted)] py-2 text-sm">
+                      Мої замовлення
                     </Link>
                   )}
                   <Link href="/messages" onClick={() => setOpen(false)} className="text-[var(--muted)] py-2 text-sm">

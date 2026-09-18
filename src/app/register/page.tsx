@@ -72,9 +72,9 @@ export default function RegisterPage() {
     if (result?.error) {
       router.push("/login");
     } else {
-      // Виконавця ведемо одразу дозаповнювати профіль — без опису й ціни
-      // він у каталозі не з'явиться.
-      router.push(isVendor ? "/vendor" : "/dashboard");
+      // Обидві ролі потрапляють на персональну сторінку; виконавця відкриваємо
+      // одразу на його вкладці — там банер веде дозаповнити профіль каталогу.
+      router.push(isVendor ? "/me?tab=vendor" : "/me");
       router.refresh();
     }
   }

@@ -108,8 +108,13 @@ body {
   background-attachment: fixed, fixed, fixed;
   background-repeat: no-repeat;
 }
-a { color: inherit; text-decoration: none; }
-button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+/* MARKER-CSS-V3: у @layer base, інакше нешаровані елементні селектори
+   перебивають Tailwind-утиліти (шар utilities програє unlayered CSS) —
+   через це утиліти фону й кольору на кнопках і посиланнях не діяли. */
+@layer base {
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+}
 em {
   font-style: italic;
   background: linear-gradient(135deg, var(--brand-gold-light) 0%, var(--brand-gold) 50%, var(--brand-gold-deep) 100%);
@@ -1628,4 +1633,470 @@ em {
   .noir-event-tag { grid-column: 1 / -1; text-align: left; }
   .noir-pro-card { padding: 32px 24px; }
   .noir-pro-price { font-size: 72px; }
+}
+
+/* ═══ «Афіша» Edition · театральна афіша: індиго-кін, квитки, маркіза ══════
+   Стилі скоуплені під .afisha (обгортка на головній), токени :root не
+   змінюються — легасі-роути та noir-компоненти лишаються неторканими. */
+.afisha {
+  --af-bg-0: #0C0B16;
+  --af-bg-1: #141222;
+  --af-bg-2: #1D1A31;
+  --af-paper: #F6F1E5;
+  --af-paper-ink: #17141F;
+  --af-paper-dim: rgba(23, 20, 31, 0.6);
+  --af-muted: rgba(246, 241, 229, 0.62);
+  --af-dim: rgba(246, 241, 229, 0.36);
+  --af-line: rgba(246, 241, 229, 0.13);
+  --af-line-2: rgba(246, 241, 229, 0.26);
+  --af-coral: #FF5C49;
+  --af-amber: #FFC24B;
+  --af-sky: #86A7FF;
+  --af-rose: #FF8FB8;
+
+  position: relative;
+  color: var(--af-paper);
+  font-family: var(--body-sans);
+  background-color: var(--af-bg-0);
+  background-image:
+    radial-gradient(ellipse 70% 42% at 18% -6%, rgba(255, 194, 75, 0.10), transparent 68%),
+    radial-gradient(ellipse 60% 38% at 84% -4%, rgba(255, 92, 73, 0.09), transparent 66%),
+    radial-gradient(ellipse 90% 60% at 50% 108%, rgba(134, 167, 255, 0.06), transparent 70%),
+    repeating-linear-gradient(115deg, rgba(246, 241, 229, 0.016) 0 1px, transparent 1px 7px),
+    linear-gradient(180deg, var(--af-bg-0), #0A0912 60%, var(--af-bg-0));
+  overflow: hidden;
+}
+.afisha ::selection { background: var(--af-coral); color: var(--af-paper); }
+
+.af-section { position: relative; max-width: 1320px; margin: 0 auto; padding: 118px 48px 96px; }
+
+/* Типографіка */
+.af-kicker {
+  display: inline-flex; align-items: center; gap: 14px;
+  font-family: var(--mono-code);
+  font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--af-amber);
+}
+.af-kicker::before, .af-kicker.rule-after::after { content: "✶"; color: var(--af-coral); font-size: 12px; letter-spacing: 0; }
+.af-h2 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(42px, 5.5vw, 84px);
+  line-height: 0.97;
+  letter-spacing: -0.02em;
+  color: var(--af-paper);
+  margin: 0;
+  font-variation-settings: "opsz" 144, "SOFT" 40;
+}
+.af-h2 .accent { font-style: italic; color: var(--af-coral); font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1; }
+.af-h2 .hollow {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--af-paper);
+}
+.af-lead { font-size: 17px; line-height: 1.6; color: var(--af-muted); max-width: 580px; margin: 0; }
+.af-num { font-family: var(--mono-code); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--af-dim); }
+.af-head { display: flex; flex-direction: column; gap: 22px; max-width: 680px; margin-bottom: 56px; }
+
+/* Штамп */
+.af-stamp {
+  display: inline-block;
+  padding: 8px 14px;
+  border: 2px solid var(--af-coral);
+  border-radius: 6px;
+  color: var(--af-coral);
+  font-family: var(--mono-code);
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  transform: rotate(-6deg);
+  mask-image: radial-gradient(circle at 30% 60%, black 96%, transparent 100%);
+  opacity: 0.92;
+}
+.af-stamp.amber { border-color: var(--af-amber); color: var(--af-amber); transform: rotate(4deg); }
+
+/* Кнопки */
+.af-btn {
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 17px 28px;
+  background: var(--af-paper);
+  color: var(--af-paper-ink);
+  font-family: var(--mono-code);
+  font-weight: 700; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+  border: 2px solid var(--af-paper);
+  border-radius: 4px;
+  box-shadow: 6px 6px 0 var(--af-coral);
+  transition: transform .2s, box-shadow .2s;
+}
+.af-btn:hover { transform: translate(-2px, -2px); box-shadow: 9px 9px 0 var(--af-coral); }
+.af-btn:active { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--af-coral); }
+.af-btn .arr { transition: transform .25s; }
+.af-btn:hover .arr { transform: translateX(4px); }
+.af-btn-ghost {
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 17px 28px;
+  background: transparent;
+  color: var(--af-paper);
+  font-family: var(--mono-code);
+  font-weight: 600; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+  border: 2px dashed var(--af-line-2);
+  border-radius: 4px;
+  transition: border-color .2s, background .2s, transform .2s;
+}
+.af-btn-ghost:hover { border-color: var(--af-amber); color: var(--af-amber); background: rgba(255, 194, 75, 0.06); transform: translateY(-2px); }
+.af-cta-row { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+
+/* ─── Hero: сцена з прожекторами ─── */
+.af-hero {
+  position: relative;
+  min-height: min(96vh, 860px);
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 132px 48px 72px;
+  display: flex; flex-direction: column; justify-content: center; gap: 40px;
+}
+.af-spot {
+  position: absolute; inset: 0; pointer-events: none; overflow: visible;
+}
+.af-spot::before, .af-spot::after {
+  content: "";
+  position: absolute; top: -12%;
+  width: 46%; height: 120%;
+  opacity: 0.5;
+  filter: blur(6px);
+  mix-blend-mode: screen;
+}
+.af-spot::before {
+  left: 4%;
+  background: conic-gradient(from 168deg at 50% 0%, transparent 0deg, rgba(255, 194, 75, 0.16) 10deg, transparent 26deg);
+  animation: af-sway 11s ease-in-out infinite alternate;
+}
+.af-spot::after {
+  right: 4%;
+  background: conic-gradient(from 168deg at 50% 0%, transparent 0deg, rgba(134, 167, 255, 0.14) 10deg, transparent 26deg);
+  animation: af-sway 13s ease-in-out infinite alternate-reverse;
+}
+@keyframes af-sway { from { transform: rotate(-7deg); } to { transform: rotate(7deg); } }
+
+.af-marquee {
+  position: relative;
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  border: 1px solid var(--af-line-2);
+  border-radius: 6px;
+  padding: 12px 20px;
+  background: rgba(20, 18, 34, 0.72);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.af-bulbs {
+  flex: 1; height: 10px; min-width: 60px;
+  background-image: radial-gradient(circle 2.6px at 11px 5px, var(--af-amber) 100%, transparent);
+  background-size: 22px 10px; background-repeat: repeat-x;
+  filter: drop-shadow(0 0 5px rgba(255, 194, 75, 0.85));
+  animation: af-chase 1.1s steps(2) infinite;
+}
+@keyframes af-chase { to { background-position-x: 22px; } }
+.af-marquee .t { font-family: var(--mono-code); font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--af-paper); white-space: nowrap; }
+
+.af-hero-grid { display: grid; grid-template-columns: 1.7fr 1fr; gap: 64px; align-items: end; }
+.af-hero-left { display: flex; flex-direction: column; gap: 26px; position: relative; }
+.af-display {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(64px, 10.5vw, 158px);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  margin: 0;
+  text-wrap: balance;
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+}
+.af-display .l2 { display: block; color: transparent; -webkit-text-stroke: 1.5px var(--af-paper); }
+.af-display .l3 { display: block; font-style: italic; color: var(--af-coral); font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1; }
+.af-hero-stamp { position: absolute; top: -18px; right: 0; }
+.af-pitch { font-size: 20px; line-height: 1.5; color: var(--af-paper); max-width: 560px; margin: 0; font-weight: 500; }
+.af-hero .af-lead { max-width: 540px; }
+
+/* Квиткові корінці (чесні факти) */
+.af-tickets { display: flex; flex-direction: column; gap: 18px; }
+.af-ticket {
+  position: relative;
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px;
+  background: var(--af-paper);
+  color: var(--af-paper-ink);
+  border-radius: 10px;
+  padding: 20px 24px 20px 30px;
+  box-shadow: 0 14px 34px -14px rgba(0, 0, 0, 0.65);
+}
+.af-ticket::before {
+  content: "";
+  position: absolute; top: 10px; bottom: 10px; right: 76px;
+  border-left: 2px dashed rgba(23, 20, 31, 0.25);
+}
+.af-ticket::after {
+  content: "";
+  position: absolute; right: 68px; top: -8px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--af-bg-0);
+  box-shadow: 0 calc(100% + 40px) 0 0 var(--af-bg-0);
+}
+.af-ticket .num2 {
+  position: absolute; right: 68px; bottom: -8px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--af-bg-0);
+}
+.af-ticket:nth-child(1) { transform: rotate(-1.6deg); }
+.af-ticket:nth-child(2) { transform: rotate(0.9deg); }
+.af-ticket:nth-child(3) { transform: rotate(-0.7deg); }
+.af-ticket .val {
+  font-family: var(--display); font-weight: 500;
+  font-size: 44px; line-height: 1; letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 144;
+}
+.af-ticket .val .unit { font-size: 18px; font-style: italic; color: var(--af-coral); margin-left: 4px; }
+.af-ticket .cap { font-family: var(--mono-code); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--af-paper-dim); margin-top: 6px; }
+.af-ticket .no {
+  writing-mode: vertical-rl;
+  font-family: var(--mono-code); font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--af-coral);
+  justify-self: end;
+  padding-left: 18px;
+}
+
+/* ─── Акти (як це працює) ─── */
+.af-acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--af-line-2); background: var(--af-line); grid-auto-rows: 1fr; }
+.af-act {
+  background: var(--af-bg-1);
+  padding: 40px 36px 44px;
+  display: flex; flex-direction: column; gap: 18px;
+  outline: 1px solid var(--af-line);
+  transition: background .25s;
+}
+.af-act:hover { background: var(--af-bg-2); }
+.af-act .roman {
+  font-family: var(--display); font-style: italic; font-weight: 400;
+  font-size: 64px; line-height: 1; color: var(--af-amber);
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+}
+.af-act .act-label { font-family: var(--mono-code); font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--af-dim); }
+.af-act h3 { font-family: var(--display); font-weight: 400; font-size: 26px; letter-spacing: -0.01em; margin: 0; color: var(--af-paper); }
+.af-act p { font-size: 14px; line-height: 1.6; color: var(--af-muted); margin: 0; }
+
+/* ─── Стіна афіш (приклади свят) ─── */
+.af-wall { display: grid; grid-template-columns: repeat(3, 1fr); gap: 34px; }
+.af-poster {
+  position: relative;
+  display: flex; flex-direction: column; gap: 16px; justify-content: space-between;
+  min-height: 300px;
+  background: var(--af-bg-1);
+  border: 2px solid var(--af-paper);
+  border-radius: 4px;
+  padding: 26px 26px 24px;
+  transition: transform .28s, box-shadow .28s;
+}
+.af-poster:nth-child(odd)  { transform: rotate(-1.1deg); box-shadow: 8px 8px 0 rgba(255, 92, 73, 0.85); }
+.af-poster:nth-child(even) { transform: rotate(1deg);    box-shadow: 8px 8px 0 rgba(255, 194, 75, 0.85); }
+.af-poster:nth-child(3n)   { box-shadow: 8px 8px 0 rgba(134, 167, 255, 0.85); }
+.af-poster:hover { transform: rotate(0deg) translateY(-6px); box-shadow: 12px 12px 0 rgba(246, 241, 229, 0.92); }
+.af-poster.feature { grid-column: span 2; grid-row: span 2; min-height: 420px; background: linear-gradient(160deg, var(--af-bg-2), var(--af-bg-1)); }
+.af-poster.feature .af-poster-title { font-size: clamp(36px, 4vw, 56px); }
+.af-poster-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.af-poster-num { font-family: var(--mono-code); font-size: 11px; letter-spacing: 0.2em; color: var(--af-dim); }
+.af-poster-tag {
+  font-family: var(--mono-code); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--af-amber); border: 1px solid rgba(255, 194, 75, 0.5); border-radius: 999px;
+  padding: 5px 12px;
+}
+.af-poster-title { font-family: var(--display); font-weight: 400; font-size: 28px; line-height: 1.06; letter-spacing: -0.015em; margin: 0; color: var(--af-paper); font-variation-settings: "opsz" 144; }
+.af-poster-body { font-size: 14px; line-height: 1.55; color: var(--af-muted); margin: 0; }
+.af-poster-link { font-family: var(--mono-code); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--af-coral); margin-top: 4px; }
+.af-poster:hover .af-poster-link { text-decoration: underline; text-underline-offset: 4px; }
+
+/* ─── Програмка (конструктор) ─── */
+.af-program { border-top: 2px solid var(--af-line-2); }
+.af-program-row {
+  display: grid; grid-template-columns: 96px 1.5fr 1fr; gap: 40px;
+  padding: 36px 0; border-bottom: 1px solid var(--af-line);
+  align-items: start;
+  transition: padding-left .25s, background .25s;
+}
+.af-program-row:hover { padding-left: 14px; }
+.af-program-row .n {
+  font-family: var(--display); font-weight: 300; font-style: italic;
+  font-size: 76px; line-height: 0.9; color: transparent;
+  -webkit-text-stroke: 1.5px var(--af-coral);
+}
+.af-program-row h3 { font-family: var(--display); font-weight: 400; font-size: 28px; letter-spacing: -0.01em; margin: 0 0 10px; color: var(--af-paper); }
+.af-program-row p { font-size: 15px; line-height: 1.6; color: var(--af-muted); margin: 0; }
+.af-program-meta { display: flex; flex-direction: column; gap: 0; border-left: 1px dashed var(--af-line-2); padding-left: 28px; align-self: stretch; justify-content: center; }
+.af-program-meta .row { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px dotted var(--af-line); }
+.af-program-meta .row:last-child { border-bottom: 0; }
+.af-program-meta .k { font-family: var(--mono-code); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--af-dim); }
+.af-program-meta .v { font-family: var(--mono-code); font-size: 12px; color: var(--af-amber); }
+
+/* ─── Репертуарна дошка (календар) ─── */
+.af-cal { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: start; }
+.af-cal-board { border: 2px solid var(--af-paper); border-radius: 6px; background: var(--af-bg-1); padding: 32px; box-shadow: 10px 10px 0 rgba(255, 194, 75, 0.8); }
+.af-cal-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; }
+.af-cal-head .mo { font-family: var(--display); font-style: italic; font-size: 56px; line-height: 1; color: var(--af-paper); }
+.af-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.af-cal-day {
+  aspect-ratio: 1;
+  display: grid; place-items: center;
+  font-family: var(--mono-code); font-size: 12px;
+  color: var(--af-muted);
+  border: 1px solid var(--af-line);
+  border-radius: 4px;
+  transition: border-color .2s, color .2s;
+}
+.af-cal-day.dow { aspect-ratio: auto; padding: 8px 0; border: 0; color: var(--af-dim); font-size: 9px; letter-spacing: 0.2em; }
+.af-cal-day.has-event { border-color: rgba(255, 194, 75, 0.6); color: var(--af-amber); position: relative; }
+.af-cal-day.has-event::after { content: "•"; position: absolute; bottom: 2px; color: var(--af-coral); font-size: 12px; line-height: 1; }
+.af-cal-day.star { background: var(--af-coral); border-color: var(--af-coral); color: var(--af-paper); font-weight: 700; }
+.af-cal-day.pad { border-color: transparent; color: transparent; }
+.af-cal-note { display: flex; justify-content: space-between; margin-top: 18px; }
+.af-bill { display: flex; flex-direction: column; }
+.af-bill-row {
+  display: grid; grid-template-columns: 84px 1fr auto; gap: 20px; align-items: center;
+  padding: 22px 0; border-bottom: 1px dashed var(--af-line-2);
+  transition: padding-left .2s;
+}
+.af-bill-row:hover { padding-left: 10px; }
+.af-bill-date { text-align: center; border: 1px solid var(--af-line-2); border-radius: 6px; padding: 10px 6px; }
+.af-bill-date .d { display: block; font-family: var(--display); font-size: 30px; line-height: 1; color: var(--af-paper); }
+.af-bill-date .m { display: block; font-family: var(--mono-code); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--af-dim); margin-top: 5px; }
+.af-bill-title { font-family: var(--display); font-weight: 400; font-size: 21px; color: var(--af-paper); letter-spacing: -0.01em; }
+.af-bill-sub { font-size: 13px; color: var(--af-muted); margin-top: 4px; }
+.af-bill-tag { font-family: var(--mono-code); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--af-sky); border: 1px solid rgba(134, 167, 255, 0.4); border-radius: 999px; padding: 6px 12px; white-space: nowrap; }
+
+/* ─── Підбір (каса) ─── */
+.af-match { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: stretch; }
+.af-match-paper {
+  background: var(--af-paper); color: var(--af-paper-ink);
+  border-radius: 10px; padding: 36px;
+  display: flex; flex-direction: column; gap: 4px;
+  transform: rotate(-0.8deg);
+  box-shadow: 0 18px 44px -18px rgba(0, 0, 0, 0.7);
+}
+.af-match-paper .hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.af-match-paper .hd .t { font-family: var(--mono-code); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--af-paper-dim); }
+.af-match-paper .hd .code { font-family: var(--mono-code); font-size: 11px; color: var(--af-coral); }
+.af-match-row { display: flex; justify-content: space-between; gap: 20px; padding: 13px 0; border-bottom: 1px dashed rgba(23, 20, 31, 0.22); }
+.af-match-row .k { font-family: var(--mono-code); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--af-paper-dim); }
+.af-match-row .v { font-family: var(--display); font-size: 19px; color: var(--af-paper-ink); }
+.af-match-paper .af-btn { align-self: flex-start; margin-top: 22px; box-shadow: 6px 6px 0 var(--af-amber); border-color: var(--af-paper-ink); }
+.af-match-dark {
+  background: var(--af-bg-1);
+  border: 2px solid var(--af-paper);
+  border-radius: 10px; padding: 36px;
+  display: flex; flex-direction: column; gap: 4px;
+  transform: rotate(0.7deg);
+  position: relative;
+  box-shadow: 10px 10px 0 rgba(255, 92, 73, 0.85);
+}
+.af-match-dark .hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.af-match-dark .hd .t { font-family: var(--mono-code); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--af-dim); }
+.af-match-dark .hd .code { font-family: var(--mono-code); font-size: 11px; color: var(--af-amber); }
+.af-match-dark .af-match-row { border-bottom-color: var(--af-line); }
+.af-match-dark .af-match-row .k { color: var(--af-dim); }
+.af-match-dark .af-match-row .v { color: var(--af-paper); }
+.af-match-dark .af-match-row .v.hot { color: var(--af-amber); font-style: italic; }
+.af-score {
+  display: flex; align-items: baseline; gap: 14px;
+  border: 2px solid var(--af-coral); border-radius: 8px;
+  padding: 18px 22px; margin: 10px 0 16px;
+  transform: rotate(-1.4deg);
+}
+.af-score .big { font-family: var(--display); font-weight: 500; font-size: 72px; line-height: 1; color: var(--af-coral); font-variation-settings: "opsz" 144; }
+.af-score .of { font-family: var(--mono-code); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--af-muted); max-width: 180px; line-height: 1.6; }
+
+/* ─── Репертуар сьогодні (index) ─── */
+.af-idx { border-top: 2px solid var(--af-line-2); }
+.af-idx-head, .af-idx-row { display: grid; grid-template-columns: 52px 84px 1.6fr 1fr 92px 96px; gap: 22px; align-items: center; }
+.af-idx-head { padding: 14px 0; border-bottom: 1px solid var(--af-line); font-family: var(--mono-code); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--af-dim); }
+.af-idx-row { padding: 19px 0; border-bottom: 1px solid var(--af-line); transition: background .15s, padding-left .2s; }
+.af-idx-row:hover { padding-left: 12px; background: rgba(246, 241, 229, 0.02); }
+.af-idx-row .idx { font-family: var(--mono-code); font-size: 11px; color: var(--af-dim); }
+.af-idx-row .date { font-family: var(--mono-code); font-size: 12px; letter-spacing: 0.1em; color: var(--af-amber); }
+.af-idx-row .title { font-family: var(--display); font-weight: 400; font-size: 21px; letter-spacing: -0.01em; line-height: 1.15; color: var(--af-paper); }
+.af-idx-row .place { font-size: 13px; color: var(--af-muted); }
+.af-idx-row .price { font-family: var(--mono-code); font-size: 12px; color: var(--af-paper); text-align: right; }
+.af-idx-row .tag { font-family: var(--mono-code); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--af-coral); text-align: right; }
+
+/* ─── Для виконавців (сцена + каса) ─── */
+.af-pro { display: grid; grid-template-columns: 1.15fr 1fr; gap: 56px; align-items: start; }
+.af-pro-list { display: flex; flex-direction: column; border-top: 1px solid var(--af-line-2); }
+.af-pro-item { display: grid; grid-template-columns: 52px 1fr; gap: 22px; padding: 20px 0; border-bottom: 1px solid var(--af-line); align-items: start; }
+.af-pro-item .rn { font-family: var(--display); font-style: italic; font-size: 26px; line-height: 1.1; color: var(--af-amber); font-variation-settings: "opsz" 144, "SOFT" 100; }
+.af-pro-item .lbl { font-family: var(--display); font-size: 19px; color: var(--af-paper); margin-bottom: 4px; letter-spacing: -0.005em; }
+.af-pro-item .dsc { font-size: 13px; line-height: 1.55; color: var(--af-muted); }
+.af-kasa {
+  background: var(--af-paper); color: var(--af-paper-ink);
+  border-radius: 10px; padding: 40px;
+  display: flex; flex-direction: column; gap: 26px;
+  position: relative;
+  transform: rotate(0.8deg);
+  box-shadow: 12px 12px 0 rgba(134, 167, 255, 0.85);
+}
+.af-kasa::before {
+  content: "";
+  position: absolute; left: 24px; right: 24px; top: 0;
+  height: 8px;
+  background-image: radial-gradient(circle 4px at 8px 0, var(--af-bg-0) 100%, transparent);
+  background-size: 20px 8px; background-repeat: repeat-x;
+}
+.af-kasa .win { font-family: var(--mono-code); font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--af-paper-dim); }
+.af-kasa-price { font-family: var(--display); font-weight: 500; font-size: 92px; line-height: 1; letter-spacing: -0.03em; font-variation-settings: "opsz" 144; }
+.af-kasa-price .per { display: block; font-family: var(--mono-code); font-size: 11px; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: var(--af-paper-dim); margin-top: 12px; line-height: 1.7; }
+.af-kasa .af-match-row .v { font-size: 17px; }
+.af-kasa .af-match-row .v.hot { color: var(--af-coral); font-style: italic; }
+.af-kasa .af-cta-row { margin-top: 4px; }
+.af-kasa .af-btn { border-color: var(--af-paper-ink); box-shadow: 5px 5px 0 var(--af-coral); }
+.af-kasa .af-btn-ghost { color: var(--af-paper-ink); border-color: rgba(23, 20, 31, 0.35); }
+.af-kasa .af-btn-ghost:hover { color: var(--af-coral); border-color: var(--af-coral); background: rgba(255, 92, 73, 0.06); }
+
+/* ─── Титри ─── */
+.af-credits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--af-line-2); border: 1px solid var(--af-line-2); margin-top: 48px; }
+.af-credit { background: var(--af-bg-0); padding: 30px; display: flex; flex-direction: column; gap: 10px; }
+.af-credit .k { font-family: var(--mono-code); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--af-dim); }
+.af-credit .v { font-family: var(--display); font-size: 23px; line-height: 1.2; letter-spacing: -0.01em; color: var(--af-paper); }
+.af-finale { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-top: 56px; }
+.af-curtain {
+  margin-top: 72px;
+  height: 14px;
+  background-image: radial-gradient(circle 5px at 12px 0, var(--af-coral) 100%, transparent);
+  background-size: 24px 14px; background-repeat: repeat-x;
+  opacity: 0.85;
+}
+
+/* ─── Responsive («Афіша») ─── */
+@media (max-width: 980px) {
+  .af-section { padding: 84px 24px; }
+  .af-hero { padding: 116px 24px 56px; }
+  .af-hero-grid { grid-template-columns: 1fr; gap: 48px; }
+  .af-hero-stamp { position: static; align-self: flex-start; }
+  .af-acts { grid-template-columns: 1fr; }
+  .af-wall { grid-template-columns: 1fr 1fr; }
+  .af-poster.feature { grid-column: span 2; grid-row: span 1; }
+  .af-program-row { grid-template-columns: 64px 1fr; }
+  .af-program-row .n { font-size: 52px; }
+  .af-program-meta { grid-column: 1 / -1; border-left: 0; border-top: 1px dashed var(--af-line-2); padding-left: 0; padding-top: 14px; }
+  .af-cal { grid-template-columns: 1fr; }
+  .af-match { grid-template-columns: 1fr; }
+  .af-match-paper, .af-match-dark { transform: none; }
+  .af-pro { grid-template-columns: 1fr; }
+  .af-kasa { transform: none; }
+  .af-idx-head, .af-idx-row { grid-template-columns: 36px 70px 1fr 80px; }
+  .af-idx-head .h-place, .af-idx-row .place,
+  .af-idx-head .h-tag, .af-idx-row .tag { display: none; }
+}
+@media (max-width: 600px) {
+  .af-wall { grid-template-columns: 1fr; }
+  .af-poster.feature { grid-column: span 1; }
+  .af-poster, .af-ticket { transform: none; }
+  .af-credits { grid-template-columns: 1fr; }
+  .af-marquee .t.sub { display: none; }
+  .af-kasa { padding: 30px 22px; }
+  .af-kasa-price { font-size: 64px; }
+  .af-bill-row { grid-template-columns: 64px 1fr; }
+  .af-bill-tag { grid-column: 1 / -1; justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .af-bulbs, .af-spot::before, .af-spot::after { animation: none; }
+  .af-btn, .af-btn-ghost, .af-poster, .af-idx-row, .af-program-row, .af-bill-row { transition: none; }
 }

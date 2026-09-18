@@ -48,6 +48,69 @@ export async function GET() {
   }
 }
 
+/**
+ * «Стати виконавцем»: створює профіль виконавця для акаунта, який
+ * реєструвався як клієнт. Мінімум полів — решта заповнюється в кабінеті.
+ */
+export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ error: "Необхідна авторизація" }, { status: 401 });
+  }
+
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return NextResponse.json({ error: "Некоректний запит" }, { status: 400 });
+  }
+
+  const businessName = typeof body.businessName === "string" ? body.businessName.trim() : "";
+  if (!businessName) {
+    return NextResponse.json({ error: "Вкажіть назву бізнесу" }, { status: 400 });
+  }
+  if (!isEventCategory(body.category)) {
+    return NextResponse.json({ error: "Оберіть напрям роботи" }, { status: 400 });
+  }
+  const city = typeof body.city === "string" ? body.city.trim() : "";
+  if (!city) {
+    return NextResponse.json({ error: "Вкажіть місто" }, { status: 400 });
+  }
+
+  try {
+    const db = getDb();
+    const existing = await db.vendor.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    });
+    if (existing) {
+      return NextResponse.json({ error: "Профіль виконавця вже існує" }, { status: 409 });
+    }
+
+    const vendor = await db.vendor.create({
+      data: {
+        userId: session.user.id,
+        businessName: businessName.slice(0, 120),
+        category: body.category,
+        city: city.slice(0, 80),
+      },
+      select: SELECT,
+    });
+
+    // Роль у сесії (JWT) оновиться при наступному вході; функціонал на
+    // персональній сторінці спирається на наявність vendor, а не на роль.
+    await db.user.update({
+      where: { id: session.user.id },
+      data: { role: "VENDOR" },
+    });
+
+    return NextResponse.json({ vendor }, { status: 201 });
+  } catch (error) {
+    console.error("POST /api/vendors/me error:", error);
+    return NextResponse.json({ error: "Помилка сервера" }, { status: 500 });
+  }
+}
+
 const MAX_PHOTOS = 10;
 const PRICE_MAX = 10_000_000;
 
