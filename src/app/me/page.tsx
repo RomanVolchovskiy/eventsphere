@@ -83,23 +83,27 @@ function fmtDate(d: string) {
 
 /* ── Сторінка ────────────────────────────────────────────────────────────── */
 
+// Початкова вкладка з ?tab= (без useSearchParams, щоб не тягнути Suspense).
+// Читається в ініціалізаторі стану, а не в ефекті: поки дані вантажаться,
+// сторінка рендерить лише спінер, тож розбіжності з SSR тут не виникає.
+function initialTab(): Tab {
+  if (typeof window === "undefined") return "overview";
+  const t = new URLSearchParams(window.location.search).get("tab");
+  return t === "client" || t === "vendor" || t === "settings" || t === "overview" ? t : "overview";
+}
+
 export default function PersonalPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  const [tab, setTab] = useState<Tab>("overview");
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [events, setEvents] = useState<EventItem[]>([]);
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [orders, setOrders] = useState<VendorOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadedAt, setLoadedAt] = useState<number | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-
-  // Початкова вкладка з ?tab= (без useSearchParams, щоб не тягнути Suspense).
-  useEffect(() => {
-    const t = new URLSearchParams(window.location.search).get("tab");
-    if (t === "client" || t === "vendor" || t === "settings" || t === "overview") setTab(t);
-  }, []);
 
   const loadAll = useCallback(async () => {
     const meRes = await fetch("/api/users/me");
@@ -127,6 +131,7 @@ export default function PersonalPage() {
       setEvents(data.events);
       setBookings(data.bookings);
       setOrders(data.orders);
+      setLoadedAt(Date.now());
       setLoadError(null);
     } catch {
       setLoadError("Не вдалося завантажити сторінку. Оновіть її або спробуйте пізніше.");
@@ -145,6 +150,7 @@ export default function PersonalPage() {
         setEvents(data.events);
         setBookings(data.bookings);
         setOrders(data.orders);
+        setLoadedAt(Date.now());
       } catch {
         if (alive) setLoadError("Не вдалося завантажити сторінку. Оновіть її або спробуйте пізніше.");
       } finally {
@@ -178,6 +184,13 @@ export default function PersonalPage() {
   }
 
   const { user, vendor, stats } = profile;
+
+  // «Днів до події» рахуємо від миті завантаження даних, а не від Date.now()
+  // під час рендеру — інакше значення пливе на кожному перемальовуванні.
+  const daysToNext = loadedAt === null ? null : (events
+    .map((e) => Math.ceil((new Date(e.date).getTime() - loadedAt) / 86400000))
+    .filter((d) => d > 0)
+    .sort((a, b) => a - b)[0] ?? null);
   const firstLetter = (user.name ?? user.email)[0]?.toUpperCase() ?? "Є";
   const memberSince = new Date(user.createdAt).toLocaleDateString("uk-UA", {
     month: "long", year: "numeric",
@@ -301,8 +314,8 @@ export default function PersonalPage() {
           {tab === "overview" && (
             <OverviewTab
               profile={profile}
-              events={events}
               orders={orders}
+              daysToNext={daysToNext}
               openTab={openTab}
             />
           )}
@@ -322,15 +335,12 @@ export default function PersonalPage() {
 /* ── Огляд ───────────────────────────────────────────────────────────────── */
 
 function OverviewTab({
-  profile, events, orders, openTab,
+  profile, orders, daysToNext, openTab,
 }: {
-  profile: Profile; events: EventItem[]; orders: VendorOrder[]; openTab: (t: Tab) => void;
+  profile: Profile; orders: VendorOrder[];
+  daysToNext: number | null; openTab: (t: Tab) => void;
 }) {
   const { vendor, stats } = profile;
-  const daysToNext = events
-    .map((e) => Math.ceil((new Date(e.date).getTime() - Date.now()) / 86400000))
-    .filter((d) => d > 0)
-    .sort((a, b) => a - b)[0] ?? null;
   const pendingOrders = orders.filter((o) => o.status === "PENDING").length;
 
   return (
