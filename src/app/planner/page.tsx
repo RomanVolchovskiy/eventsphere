@@ -6,12 +6,12 @@ import {
   Calendar,
   DollarSign,
   Users,
-  CheckCircle2,
-  Circle,
   Plus,
   Sparkles,
   Clock,
 } from "lucide-react";
+import { TimelineSection, type TaskItem } from "./TimelineSection";
+import { GuestsSection, type GuestItem } from "./GuestsSection";
 
 export const dynamic = "force-dynamic";
 
@@ -27,12 +27,6 @@ const statusLabels: Record<string, string> = {
   COMPLETED: "Завершено",
   PENDING: "Очікує",
   CANCELLED: "Скасовано",
-};
-
-const rsvpConfig: Record<string, { label: string; color: string }> = {
-  yes: { label: "Підтвердив", color: "text-green-400 bg-green-400/10" },
-  no: { label: "Відмовив", color: "text-red-400 bg-red-400/10" },
-  pending: { label: "Очікує", color: "text-yellow-400 bg-yellow-400/10" },
 };
 
 /** Оболонка сторінки — спільна для всіх станів (гість / без подій / з подією). */
@@ -156,6 +150,23 @@ export default async function PlannerPage() {
     month: "long",
     year: "numeric",
   });
+
+  // Клієнтські секції отримують уже готові до показу рядки: дати форматуються
+  // тут, на сервері, щоб не тягнути Date.now() і локаль у рендер на клієнті.
+  const taskItems: TaskItem[] = timeline.map((t) => ({
+    id: t.id,
+    title: t.title,
+    dueLabel: t.dueDate.toLocaleDateString("uk-UA", { day: "numeric", month: "short" }),
+    isDone: t.isDone,
+    overdue: !t.isDone && t.dueDate < now,
+  }));
+  const guestItems: GuestItem[] = guests.map((g) => ({
+    id: g.id,
+    name: g.name,
+    email: g.email,
+    phone: g.phone,
+    rsvp: g.rsvp === "yes" || g.rsvp === "no" ? g.rsvp : null,
+  }));
 
   return (
     <div className="pt-16 min-h-screen">
@@ -293,57 +304,7 @@ export default async function PlannerPage() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
-          {/* Timeline */}
-          <div className="bg-[var(--dark-card)] border border-[var(--dark-border)] rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-white font-semibold flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-[var(--gold)]" />
-                Timeline підготовки
-              </h2>
-            </div>
-
-            {timeline.length === 0 ? (
-              <p className="text-[var(--text-muted)] text-sm py-6 text-center">
-                Завдань підготовки ще немає.
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {timeline.map((task) => {
-                  const overdue = !task.isDone && task.dueDate < now;
-                  const formattedDue = task.dueDate.toLocaleDateString("uk-UA", {
-                    day: "numeric",
-                    month: "short",
-                  });
-                  return (
-                    <div
-                      key={task.id}
-                      className={`flex items-center gap-3 p-3 rounded-xl ${task.isDone ? "opacity-50" : ""} hover:bg-[var(--dark)] transition-colors`}
-                    >
-                      {task.isDone ? (
-                        <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
-                      ) : (
-                        <Circle
-                          className={`w-5 h-5 flex-shrink-0 ${overdue ? "text-red-400" : "text-[var(--text-muted)]"}`}
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className={`text-sm ${task.isDone ? "line-through text-[var(--text-muted)]" : "text-white"}`}
-                        >
-                          {task.title}
-                        </p>
-                      </div>
-                      <span
-                        className={`text-xs flex-shrink-0 ${overdue ? "text-red-400" : "text-[var(--text-muted)]"}`}
-                      >
-                        {formattedDue}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          <TimelineSection eventId={event.id} tasks={taskItems} />
 
           {/* Bookings */}
           <div className="bg-[var(--dark-card)] border border-[var(--dark-border)] rounded-2xl p-6">
@@ -402,48 +363,7 @@ export default async function PlannerPage() {
           </div>
         </div>
 
-        {/* Guest list */}
-        <div className="bg-[var(--dark-card)] border border-[var(--dark-border)] rounded-2xl p-6 mt-6">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-white font-semibold flex items-center gap-2">
-              <Users className="w-4 h-4 text-[var(--gold)]" />
-              Список гостей
-            </h2>
-            <span className="text-[var(--text-muted)] text-sm">
-              {guests.length > 0 && `${guestsConfirmed} з ${guests.length} підтвердили`}
-            </span>
-          </div>
-
-          {guests.length === 0 ? (
-            <p className="text-[var(--text-muted)] text-sm py-6 text-center">
-              Список гостей порожній.
-            </p>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {guests.map((g) => {
-                const rsvp = rsvpConfig[g.rsvp ?? "pending"] ?? rsvpConfig.pending;
-                return (
-                  <div
-                    key={g.id}
-                    className="flex items-center justify-between p-3 rounded-xl hover:bg-[var(--dark)] transition-colors"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-8 h-8 rounded-full bg-[var(--dark)] flex items-center justify-center text-xs font-semibold text-[var(--gold)] flex-shrink-0">
-                        {g.name.charAt(0).toUpperCase()}
-                      </div>
-                      <span className="text-white text-sm truncate">{g.name}</span>
-                    </div>
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${rsvp.color}`}
-                    >
-                      {rsvp.label}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+        <GuestsSection eventId={event.id} guests={guestItems} />
       </div>
     </div>
   );
