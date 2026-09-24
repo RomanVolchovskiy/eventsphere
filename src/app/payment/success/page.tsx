@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { CheckCircle2, ArrowRight, Calendar, ExternalLink } from "lucide-react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { addToGoogleCalendarUrl } from "@/lib/google-calendar";
 
@@ -12,11 +14,13 @@ export default async function PaymentSuccessPage({
   const isFree = params.free === "1";
   let booking: { date: Date; vendor: { businessName: string; city: string } } | null = null;
 
-  if (params.bookingId) {
+  // Деталі бронювання бачить лише той, хто його створив.
+  const session = await getServerSession(authOptions);
+  if (params.bookingId && session) {
     try {
       const db = getDb();
-      booking = await db.booking.findUnique({
-        where: { id: params.bookingId },
+      booking = await db.booking.findFirst({
+        where: { id: params.bookingId, userId: session.user.id },
         select: {
           date: true,
           vendor: { select: { businessName: true, city: true } },
@@ -44,12 +48,13 @@ export default async function PaymentSuccessPage({
         </div>
 
         <h1 className="text-2xl font-bold text-white mb-3">
-          {isFree ? "Бронювання підтверджено!" : "Оплату отримано!"}
+          {isFree ? "Заявку надіслано!" : "Оплату отримано!"}
         </h1>
         {isFree ? (
           <p className="text-[var(--text-muted)] text-sm mb-8">
-            Заявку надіслано виконавцю. Він зв&apos;яжеться з вами найближчим часом,
-            щоб узгодити деталі та оплату. Передоплата зараз не потрібна.
+            Бронювання стане підтвердженим, щойно виконавець прийме заявку. Він
+            зв&apos;яжеться з вами, щоб узгодити деталі та оплату. Передоплата зараз не
+            потрібна. Статус заявки видно на вашій сторінці.
           </p>
         ) : (
           <>

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 import { rateLimit } from "@/lib/ratelimit";
+import { DEMO_BLOCKED_MESSAGE, DEMO_OWNER_SELECT, isDemoVendor } from "@/lib/demo";
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -26,18 +27,37 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const body = await request.json();
-  const { vendorId, date, notes, totalPrice, eventType } = body;
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return NextResponse.json({ error: "Некоректний запит" }, { status: 400 });
+  }
+  const { vendorId, notes, eventType } = body;
+  const date = typeof body.date === "string" ? new Date(body.date) : null;
+  const totalPrice = Number(body.totalPrice);
 
-  if (!vendorId || !date || !totalPrice) {
+  if (typeof vendorId !== "string" || !vendorId || !date || Number.isNaN(date.getTime())) {
     return NextResponse.json({ error: "Не вистачає даних" }, { status: 400 });
+  }
+  if (!Number.isFinite(totalPrice) || totalPrice < 0 || totalPrice > 10_000_000) {
+    return NextResponse.json({ error: "Некоректна сума" }, { status: 400 });
   }
 
   const db = getDb();
 
-  const vendor = await db.vendor.findUnique({ where: { id: vendorId } });
+  const vendor = await db.vendor.findUnique({
+    where: { id: vendorId },
+    include: DEMO_OWNER_SELECT,
+  });
   if (!vendor) {
     return NextResponse.json({ error: "Виконавця не знайдено" }, { status: 404 });
+  }
+  if (isDemoVendor(vendor)) {
+    return NextResponse.json({ error: DEMO_BLOCKED_MESSAGE }, { status: 409 });
+  }
+  if (vendor.userId === session.user.id) {
+    return NextResponse.json({ error: "Не можна забронювати власні послуги" }, { status: 400 });
   }
 
   // Free-access mode (default). Поки платежі недоступні (Stripe не працює в Україні),
@@ -45,15 +65,17 @@ export async function POST(request: NextRequest) {
   // виставити NEXT_PUBLIC_PAYMENTS_ENABLED=true у Vercel.
   const paymentsEnabled = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "true";
 
-  // Create booking — CONFIRMED одразу у вільному режимі, PENDING коли платежі ввімкнені
+  // Бронювання завжди стартує як PENDING: у вільному режимі його підтверджує
+  // виконавець у своєму кабінеті (/api/vendors/me/bookings/[id]), у платному —
+  // вебхук Stripe після оплати.
   const booking = await db.booking.create({
     data: {
       userId: session.user.id,
       vendorId,
-      date: new Date(date),
-      notes: notes || null,
-      totalPrice: Number(totalPrice),
-      status: paymentsEnabled ? "PENDING" : "CONFIRMED",
+      date,
+      notes: typeof notes === "string" && notes.trim() ? notes.trim().slice(0, 2000) : null,
+      totalPrice,
+      status: "PENDING",
     },
   });
 
@@ -80,8 +102,8 @@ export async function POST(request: NextRequest) {
           product_data: {
             name: `Бронювання: ${vendor.businessName}`,
             description: [
-              eventType,
-              new Date(date).toLocaleDateString("uk-UA", {
+              typeof eventType === "string" ? eventType : null,
+              date.toLocaleDateString("uk-UA", {
                 day: "numeric",
                 month: "long",
                 year: "numeric",
@@ -90,7 +112,7 @@ export async function POST(request: NextRequest) {
               .filter(Boolean)
               .join(" · "),
           },
-          unit_amount: Math.round(Number(totalPrice) * 100),
+          unit_amount: Math.round(totalPrice * 100),
         },
         quantity: 1,
       },

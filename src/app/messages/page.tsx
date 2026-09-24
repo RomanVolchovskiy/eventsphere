@@ -7,7 +7,9 @@ import { Send, MessageSquare, ArrowLeft, CheckCheck } from "lucide-react";
 
 type Conversation = {
   id: string;
-  vendor: { id: string; businessName: string; category: string; photos: string[] };
+  /** true — я тут виконавець, співрозмовник — клієнт. */
+  asVendor: boolean;
+  peer: { name: string; subtitle: string };
   messages: { text: string; createdAt: string }[];
   _count: { messages: number };
   updatedAt: string;
@@ -19,11 +21,6 @@ type Message = {
   createdAt: string;
   isRead: boolean;
   sender: { id: string; name: string | null };
-};
-
-const CATEGORY_LABELS: Record<string, string> = {
-  VENUE: "Локація", ENTERTAINMENT: "Розваги", CATERING: "Кейтеринг",
-  PHOTO_VIDEO: "Фото/Відео", DECOR: "Декор",
 };
 
 function MessagesContent() {
@@ -39,6 +36,7 @@ function MessagesContent() {
   const [sending, setSending] = useState(false);
   const [loadingConvs, setLoadingConvs] = useState(true);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
+  const [openError, setOpenError] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -68,10 +66,12 @@ function MessagesContent() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ vendorId: vid }),
     });
+    const data = await res.json().catch(() => ({}));
     if (res.ok) {
-      const data = await res.json();
       setActiveId(data.conversation.id);
       await fetchConversations();
+    } else {
+      setOpenError(data.error ?? "Не вдалося відкрити розмову");
     }
   }, [fetchConversations]);
 
@@ -147,6 +147,9 @@ function MessagesContent() {
         <div className={`w-full md:w-80 border-r border-[var(--dark-border)] flex flex-col ${activeId ? "hidden md:flex" : "flex"}`}>
           <div className="p-4 border-b border-[var(--dark-border)]">
             <h1 className="text-white font-semibold text-lg">Повідомлення</h1>
+            {openError && (
+              <p className="mt-2 text-xs text-amber-300">{openError}</p>
+            )}
           </div>
 
           <div className="flex-1 overflow-y-auto">
@@ -170,13 +173,13 @@ function MessagesContent() {
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-full bg-[var(--gold)]/20 flex items-center justify-center flex-shrink-0">
                       <span className="text-[var(--gold)] text-sm font-bold">
-                        {conv.vendor.businessName[0]}
+                        {conv.peer.name[0]}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <span className="text-white text-sm font-medium truncate">
-                          {conv.vendor.businessName}
+                          {conv.peer.name}
                         </span>
                         {conv._count.messages > 0 && (
                           <span className="w-5 h-5 rounded-full bg-[var(--gold)] text-black text-xs font-bold flex items-center justify-center flex-shrink-0">
@@ -185,7 +188,7 @@ function MessagesContent() {
                         )}
                       </div>
                       <p className="text-[var(--text-muted)] text-xs truncate mt-0.5">
-                        {CATEGORY_LABELS[conv.vendor.category] ?? conv.vendor.category}
+                        {conv.peer.subtitle}
                       </p>
                       {conv.messages[0] && (
                         <p className="text-[var(--text-muted)] text-xs truncate mt-1">
@@ -221,13 +224,13 @@ function MessagesContent() {
                 </button>
                 <div className="w-9 h-9 rounded-full bg-[var(--gold)]/20 flex items-center justify-center">
                   <span className="text-[var(--gold)] text-sm font-bold">
-                    {activeConv?.vendor.businessName[0]}
+                    {activeConv?.peer.name[0]}
                   </span>
                 </div>
                 <div>
-                  <div className="text-white font-medium text-sm">{activeConv?.vendor.businessName}</div>
+                  <div className="text-white font-medium text-sm">{activeConv?.peer.name}</div>
                   <div className="text-[var(--text-muted)] text-xs">
-                    {activeConv ? CATEGORY_LABELS[activeConv.vendor.category] : ""}
+                    {activeConv?.peer.subtitle}
                   </div>
                 </div>
               </div>

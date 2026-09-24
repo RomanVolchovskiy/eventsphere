@@ -11,6 +11,7 @@ import {
   Search,
 } from "lucide-react";
 import { getDb } from "@/lib/db";
+import { DEMO_OWNER_SELECT, isDemoVendor, neutralizeDemo } from "@/lib/demo";
 
 // `id` — значення для ?cat=…, `enum` — відповідник у EventCategory (prisma/schema.prisma)
 const categories = [
@@ -66,6 +67,7 @@ type VendorCardData = {
   isVerified: boolean;
   panoramaUrl: string | null;
   photos: string[];
+  isDemo: boolean;
 };
 
 export default async function CatalogPage({
@@ -77,7 +79,7 @@ export default async function CatalogPage({
   const activeCat = categories.find((c) => c.id === cat) ?? categories[0];
 
   const db = getDb();
-  const vendors: VendorCardData[] = await db.vendor.findMany({
+  const rows = await db.vendor.findMany({
     // Щойно зареєстрований виконавець ще не заповнив профіль — його картка
     // була б порожньою. Показуємо лише тих, у кого є місто й опис
     // (та сама умова у кабінеті: src/app/vendor/page.tsx isListed).
@@ -98,8 +100,15 @@ export default async function CatalogPage({
       isVerified: true,
       panoramaUrl: true,
       photos: true,
+      ...DEMO_OWNER_SELECT,
     },
   });
+  // Справжні виконавці йдуть першими, демо — в кінці (sort стабільний,
+  // тож порядок за рейтингом усередині груп зберігається).
+  const vendors: VendorCardData[] = rows
+    .map(({ user, ...v }) => neutralizeDemo(v, isDemoVendor({ user })))
+    .sort((a, b) => Number(a.isDemo) - Number(b.isDemo));
+  const hasDemo = vendors.some((v) => v.isDemo);
 
   return (
     <div className="pt-16 min-h-screen">
@@ -174,6 +183,14 @@ export default async function CatalogPage({
           </select>
         </div>
 
+        {hasDemo && (
+          <div className="mb-6 px-4 py-3 rounded-xl border border-amber-400/30 bg-amber-400/5 text-sm text-amber-200/90">
+            Профілі з позначкою <span className="font-semibold text-amber-300">«Демо»</span> — приклади,
+            щоб показати, як виглядатиме каталог. Це не справжні виконавці: забронювати чи
+            написати їм не можна.
+          </div>
+        )}
+
         {vendors.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-4xl opacity-20 mb-4">🔍</div>
@@ -227,6 +244,11 @@ function VendorCard({ vendor }: { vendor: VendorCardData }) {
             360°
           </div>
         )}
+        {vendor.isDemo && (
+          <div className="absolute top-3 left-3 bg-amber-400 text-black text-xs font-semibold px-2 py-1 rounded-full">
+            Демо
+          </div>
+        )}
         {vendor.isVerified && (
           <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm text-green-400 text-xs px-2 py-1 rounded-full flex items-center gap-1">
             <BadgeCheck className="w-3 h-3" />
@@ -240,15 +262,17 @@ function VendorCard({ vendor }: { vendor: VendorCardData }) {
           <h3 className="text-white font-semibold group-hover:text-[var(--gold)] transition-colors">
             {vendor.businessName}
           </h3>
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <Star className="w-4 h-4 text-[var(--gold)] fill-[var(--gold)]" />
-            <span className="text-white text-sm font-medium">
-              {vendor.rating.toFixed(1)}
-            </span>
-            <span className="text-[var(--text-muted)] text-xs">
-              ({vendor.reviewsCount})
-            </span>
-          </div>
+          {vendor.reviewsCount > 0 && (
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <Star className="w-4 h-4 text-[var(--gold)] fill-[var(--gold)]" />
+              <span className="text-white text-sm font-medium">
+                {vendor.rating.toFixed(1)}
+              </span>
+              <span className="text-[var(--text-muted)] text-xs">
+                ({vendor.reviewsCount})
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-3 mb-3">

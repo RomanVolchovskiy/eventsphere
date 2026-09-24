@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { rateLimit, getClientIp } from "@/lib/ratelimit";
 import { buildMatches, type MatchCandidate, type MatchInput } from "@/lib/match";
+import { DEMO_OWNER_SELECT, isDemoVendor, neutralizeDemo } from "@/lib/demo";
 
 export const dynamic = "force-dynamic";
 
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
     const db = getDb();
     // Місто не фільтруємо в SQL: якщо в місті користувача виконавця під роль
     // немає, краще запропонувати виїзний варіант зі зниженим збігом, ніж нічого.
-    candidates = await db.vendor.findMany({
+    const rows = await db.vendor.findMany({
       // Та сама умова, що й у каталозі: незаповнений профіль не пропонуємо.
       where: { city: { not: "" }, description: { not: null } },
       select: {
@@ -100,9 +101,15 @@ export async function POST(request: NextRequest) {
         isVerified: true,
         rating: true,
         reviewsCount: true,
+        ...DEMO_OWNER_SELECT,
       },
       orderBy: [{ rating: "desc" }, { reviewsCount: "desc" }],
       take: CANDIDATE_LIMIT,
+    });
+    // Вигадані рейтинг/тариф демо-профілів не повинні впливати на підбір.
+    candidates = rows.map(({ user, ...v }) => {
+      const isDemo = isDemoVendor({ user });
+      return neutralizeDemo(isDemo ? { ...v, subscription: "STANDARD" as const } : v, isDemo);
     });
   } catch (error) {
     console.error("smart-match: помилка доступу до БД", error);

@@ -145,6 +145,12 @@ export default function LoginPage() {
             </svg>
             Продовжити з Google
           </button>
+          <p className="text-center text-xs text-[var(--text-muted)] mt-3 leading-relaxed">
+            Входячи через Google, ви погоджуєтеся з{" "}
+            <Link href="/terms" className="text-[var(--gold)] hover:underline">Угодою користувача</Link>{" "}
+            та{" "}
+            <Link href="/privacy" className="text-[var(--gold)] hover:underline">Політикою конфіденційності</Link>
+          </p>
 
         </div>
 

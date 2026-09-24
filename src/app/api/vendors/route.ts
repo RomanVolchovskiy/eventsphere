@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import type { EventCategory } from "@/generated/prisma/enums";
+import { isEventCategory } from "@/lib/categories";
+import { DEMO_OWNER_SELECT, isDemoVendor, neutralizeDemo } from "@/lib/demo";
 
 export const dynamic = "force-dynamic";
 
@@ -17,14 +18,16 @@ export async function GET(request: NextRequest) {
   const category = searchParams.get("category");
   const city = searchParams.get("city");
   const q = searchParams.get("q");
+  const categoryEnum = category && category !== "all" ? category.toUpperCase() : null;
+  if (categoryEnum && !isEventCategory(categoryEnum)) {
+    return NextResponse.json({ error: "Невідома категорія" }, { status: 400 });
+  }
 
   const db = getDb();
 
   const vendors = await db.vendor.findMany({
     where: {
-      ...(category && category !== "all"
-        ? { category: category.toUpperCase() as EventCategory }
-        : {}),
+      ...(categoryEnum && isEventCategory(categoryEnum) ? { category: categoryEnum } : {}),
       ...(city ? { city: { contains: city, mode: "insensitive" } } : {}),
       ...(q
         ? {
@@ -36,14 +39,17 @@ export async function GET(request: NextRequest) {
           }
         : {}),
     },
+    include: DEMO_OWNER_SELECT,
     orderBy: [{ rating: "desc" }, { reviewsCount: "desc" }],
     take: 50,
   });
 
-  const result = vendors.map((v) => ({
-    ...v,
+  // userId і email власника назовні не віддаємо.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const result = vendors.map(({ user, userId, ...v }) => ({
+    ...neutralizeDemo(v, isDemoVendor({ user })),
     tags: tagsByCategory[v.category] ?? [],
-  }));
+  })).sort((a, b) => Number(a.isDemo) - Number(b.isDemo));
 
   return NextResponse.json({ vendors: result, total: result.length });
 }

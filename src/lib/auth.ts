@@ -69,8 +69,9 @@ export const authOptions: NextAuthOptions = {
         const { getDb } = require("./db");
         const db = getDb();
 
-        const user = await db.user.findUnique({
-          where: { email: credentials.email },
+        // Старі акаунти могли зберегтися з великими літерами в email.
+        const user = await db.user.findFirst({
+          where: { email: { equals: credentials.email.trim(), mode: "insensitive" } },
         });
 
         if (!user?.passwordHash) return null;

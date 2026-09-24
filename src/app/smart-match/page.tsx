@@ -15,8 +15,20 @@ type MatchVendor = {
   priceFrom: number;
   subscription: "STANDARD" | "PRO" | "MAX";
   isVerified: boolean;
+  isDemo: boolean;
   matchScore: number;
 };
+
+function DemoBadge() {
+  return (
+    <span
+      title="Демо-профіль для ознайомлення — забронювати не можна"
+      className="text-[10px] bg-amber-400 text-black font-semibold px-1.5 py-0.5 rounded flex-shrink-0"
+    >
+      Демо
+    </span>
+  );
+}
 
 type MatchOption = {
   vendor: MatchVendor;
@@ -401,6 +413,7 @@ export default function SmartMatchPage() {
                         </p>
                         <h3 className="text-white font-semibold flex items-center gap-2">
                           {chosen.vendor.name}
+                          {chosen.vendor.isDemo && <DemoBadge />}
                           {chosen.vendor.subscription !== "STANDARD" && (
                             <span className="text-[10px] uppercase tracking-wide border border-[var(--gold)]/40 text-[var(--gold)] px-1.5 py-0.5 rounded">
                               {chosen.vendor.subscription}
@@ -505,6 +518,7 @@ export default function SmartMatchPage() {
                                           <Check className="w-3.5 h-3.5 text-[var(--gold)] flex-shrink-0" />
                                         )}
                                         <span className="truncate">{o.vendor.name}</span>
+                                        {o.vendor.isDemo && <DemoBadge />}
                                         {i === 0 && (
                                           <span className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] flex-shrink-0">
                                             рекомендований

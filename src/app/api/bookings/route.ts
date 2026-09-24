@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getDb } from "@/lib/db";
+import { DEMO_BLOCKED_MESSAGE, DEMO_OWNER_SELECT, isDemoVendor } from "@/lib/demo";
 
 export const dynamic = "force-dynamic";
 
@@ -32,20 +33,43 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { vendorId, serviceId, eventId, date, notes, totalPrice } = body;
+    const { vendorId, serviceId, eventId, notes } = body;
+    const date = typeof body.date === "string" ? new Date(body.date) : null;
+    const totalPrice = Number(body.totalPrice);
 
-    if (!vendorId || !date || !totalPrice) {
+    if (!vendorId || !date || Number.isNaN(date.getTime()) || !body.totalPrice) {
       return NextResponse.json(
         { error: "Обов'язкові поля: vendorId, date, totalPrice" },
         { status: 400 }
       );
     }
+    if (!Number.isFinite(totalPrice) || totalPrice < 0 || totalPrice > 10_000_000) {
+      return NextResponse.json({ error: "Некоректна сума" }, { status: 400 });
+    }
 
     const db = getDb();
 
-    const vendor = await db.vendor.findUnique({ where: { id: vendorId } });
+    const vendor = await db.vendor.findUnique({
+      where: { id: vendorId },
+      include: DEMO_OWNER_SELECT,
+    });
     if (!vendor) {
       return NextResponse.json({ error: "Виконавця не знайдено" }, { status: 404 });
+    }
+    if (isDemoVendor(vendor)) {
+      return NextResponse.json({ error: DEMO_BLOCKED_MESSAGE }, { status: 409 });
+    }
+
+    // Прив'язати бронювання можна лише до власного заходу — інакше воно
+    // з'явилося б у чужому планувальнику й бюджеті.
+    if (eventId) {
+      const ownEvent = await db.event.findFirst({
+        where: { id: eventId, userId: session.user.id },
+        select: { id: true },
+      });
+      if (!ownEvent) {
+        return NextResponse.json({ error: "Захід не знайдено" }, { status: 404 });
+      }
     }
 
     const booking = await db.booking.create({
@@ -54,9 +78,9 @@ export async function POST(request: NextRequest) {
         vendorId,
         serviceId: serviceId || null,
         eventId: eventId || null,
-        date: new Date(date),
+        date,
         notes: notes || null,
-        totalPrice: Number(totalPrice),
+        totalPrice,
         status: "PENDING",
       },
       include: {

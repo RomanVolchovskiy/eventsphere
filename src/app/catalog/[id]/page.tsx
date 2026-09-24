@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import BookingPanel from "./BookingPanel";
 import { getDb } from "@/lib/db";
+import { DEMO_OWNER_SELECT, isDemoVendor, neutralizeDemo } from "@/lib/demo";
 
 const CATEGORY_LABELS: Record<string, string> = {
   VENUE: "Локація",
@@ -32,9 +33,10 @@ export default async function VendorPage({
   const { id } = await params;
   const db = getDb();
 
-  const vendor = await db.vendor.findUnique({
+  const row = await db.vendor.findUnique({
     where: { id },
     include: {
+      ...DEMO_OWNER_SELECT,
       services: { where: { isActive: true } },
       reviews: {
         include: { user: { select: { name: true } } },
@@ -48,7 +50,17 @@ export default async function VendorPage({
     },
   });
 
-  if (!vendor) notFound();
+  if (!row) notFound();
+  const { user, ...rest } = row;
+  const isDemo = isDemoVendor({ user });
+  const vendor = neutralizeDemo(
+    isDemo ? { ...rest, subscription: "STANDARD" as const, reviews: [] } : rest,
+    isDemo,
+  );
+  // Сайт виконавець міг ввести і з протоколом, і без.
+  const websiteHref = vendor.website && /^https?:\/\//i.test(vendor.website)
+    ? vendor.website
+    : `https://${vendor.website}`;
 
   const bookedDates = vendor.availability.map((a) =>
     a.date.toISOString().split("T")[0]
@@ -114,6 +126,11 @@ export default async function VendorPage({
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <h1 className="text-2xl font-bold text-white">{vendor.businessName}</h1>
+                  {isDemo && (
+                    <span className="text-xs bg-amber-400 text-black font-semibold px-2 py-0.5 rounded-full">
+                      Демо
+                    </span>
+                  )}
                   {vendor.isVerified && (
                     <BadgeCheck className="w-5 h-5 text-green-400" />
                   )}
@@ -154,6 +171,13 @@ export default async function VendorPage({
               </div>
             </div>
 
+            {isDemo && (
+              <div className="px-4 py-3 rounded-xl border border-amber-400/30 bg-amber-400/5 text-sm text-amber-200/90">
+                Це демо-профіль: він показує, як виглядатиме сторінка виконавця. За ним не стоїть
+                справжній бізнес, тому забронювати чи написати йому не можна.
+              </div>
+            )}
+
             {/* Tags */}
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
@@ -186,7 +210,7 @@ export default async function VendorPage({
                     <Globe className="w-4 h-4 text-[var(--gold)]" />
                     <span className="text-[var(--text-muted)] text-xs">Сайт</span>
                   </div>
-                  <a href={`https://${vendor.website}`} target="_blank" rel="noopener noreferrer"
+                  <a href={websiteHref} target="_blank" rel="noopener noreferrer"
                     className="text-white text-sm font-medium hover:text-[var(--gold)] transition-colors">
                     {vendor.website}
                   </a>
@@ -291,7 +315,7 @@ export default async function VendorPage({
               </div>
             )}
 
-            {vendor.reviews.length === 0 && (
+            {vendor.reviews.length === 0 && !isDemo && (
               <div className="bg-[var(--dark-card)] border border-[var(--dark-border)] rounded-2xl p-6 text-center">
                 <MessageSquare className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2 opacity-40" />
                 <p className="text-[var(--text-muted)] text-sm">Відгуків поки немає. Будьте першим!</p>
@@ -308,6 +332,7 @@ export default async function VendorPage({
                 priceTo={vendor.priceTo ?? 0}
                 bookedDates={bookedDates}
                 vendorName={vendor.businessName}
+                isDemo={isDemo}
               />
             </div>
           </div>

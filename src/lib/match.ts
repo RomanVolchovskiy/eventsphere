@@ -76,6 +76,8 @@ export type MatchCandidate = {
   isVerified: boolean;
   rating: number;
   reviewsCount: number;
+  /** Демо-профіль із seed (див. src/lib/demo.ts): показники вже обнулені. */
+  isDemo: boolean;
 };
 
 export type MatchInput = {
@@ -95,6 +97,7 @@ export type MatchVendor = {
   priceFrom: number;
   subscription: SubscriptionTier;
   isVerified: boolean;
+  isDemo: boolean;
   /** Відсоток збігу за фактичними ознаками — тариф на нього НЕ впливає. */
   matchScore: number;
 };
@@ -235,7 +238,9 @@ export function scoreCandidate(
   }
 
   const ordered = signals.sort((a, b) => b.priority - a.priority).map((s) => s.text);
-  return { fit, rank: fit * TIER_BOOST[candidate.subscription], signals: ordered };
+  // Демо-профіль потрапляє в підбір лише тоді, коли справжніх виконавців на роль немає.
+  const demoPenalty = candidate.isDemo ? 0.01 : 1;
+  return { fit, rank: fit * TIER_BOOST[candidate.subscription] * demoPenalty, signals: ordered };
 }
 
 function buildReason(signals: string[]): string {
@@ -263,6 +268,7 @@ function toOption(
       priceFrom: candidate.priceFrom ?? 0,
       subscription: candidate.subscription,
       isVerified: candidate.isVerified,
+      isDemo: candidate.isDemo,
       matchScore: Math.round(fit * 100),
     },
     estimatedCost: Math.round(estimateCost(candidate, input.guestsCount)),

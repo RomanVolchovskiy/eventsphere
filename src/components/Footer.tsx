@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LEGAL } from "@/lib/legal";
 
 function BrandMark({ size = 64 }: { size?: number }) {
   return (
@@ -96,9 +97,9 @@ export default function Footer() {
         </div>
         <div>
           <h5>Зв&apos;язок</h5>
-          <a href="mailto:hello@eventsphere.ua">hello@eventsphere.ua</a>
-          <a href="tel:+380440000000">+38 044 000 0000</a>
-          <a href="#">@eventsphere.ua</a>
+          <a href={`mailto:${LEGAL.contactEmail}`}>{LEGAL.contactEmail}</a>
+          <Link href="/terms">Угода користувача</Link>
+          <Link href="/privacy">Конфіденційність</Link>
         </div>
       </div>
 

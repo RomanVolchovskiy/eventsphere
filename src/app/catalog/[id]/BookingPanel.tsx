@@ -11,6 +11,7 @@ interface BookingPanelProps {
   priceTo: number;
   bookedDates: string[];
   vendorName: string;
+  isDemo: boolean;
 }
 
 const MONTHS = [
@@ -98,7 +99,7 @@ function MiniCalendar({ bookedDates, selected, onSelect }: {
   );
 }
 
-export default function BookingPanel({ vendorId, priceFrom, priceTo, bookedDates, vendorName }: BookingPanelProps) {
+export default function BookingPanel({ vendorId, priceFrom, priceTo, bookedDates, vendorName, isDemo }: BookingPanelProps) {
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -111,6 +112,27 @@ export default function BookingPanel({ vendorId, priceFrom, priceTo, bookedDates
   const [error, setError] = useState("");
 
   const paymentsEnabled = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "true";
+
+  if (isDemo) {
+    return (
+      <div className="bg-[var(--dark-card)] border border-amber-400/30 rounded-2xl p-6 space-y-3">
+        <span className="inline-block text-xs bg-amber-400 text-black font-semibold px-2 py-0.5 rounded-full">
+          Демо-профіль
+        </span>
+        <p className="text-white text-sm font-medium">Бронювання недоступне</p>
+        <p className="text-[var(--text-muted)] text-sm leading-relaxed">
+          Цей профіль створено для ознайомлення з платформою. Оберіть справжнього виконавця в
+          каталозі — у нього можна забронювати дату й написати повідомлення.
+        </p>
+        <button
+          onClick={() => router.push("/catalog")}
+          className="w-full border border-[var(--dark-border)] text-[var(--text-muted)] hover:border-[var(--gold)] hover:text-[var(--gold)] py-3 rounded-xl transition-colors text-sm"
+        >
+          До каталогу
+        </button>
+      </div>
+    );
+  }
 
   async function handlePayment() {
     if (!session) {
@@ -251,7 +273,9 @@ export default function BookingPanel({ vendorId, priceFrom, priceTo, bookedDates
       {showModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-[var(--dark-card)] border border-[var(--dark-border)] rounded-2xl p-7 w-full max-w-md">
-            <h3 className="text-white font-semibold text-lg mb-1">Підтвердження бронювання</h3>
+            <h3 className="text-white font-semibold text-lg mb-1">
+              {paymentsEnabled ? "Підтвердження бронювання" : "Заявка на бронювання"}
+            </h3>
             <p className="text-[var(--text-muted)] text-sm mb-6">
               {vendorName} ·{" "}
               {selectedDate && new Date(selectedDate).toLocaleDateString("uk-UA", {
@@ -317,7 +341,7 @@ export default function BookingPanel({ vendorId, priceFrom, priceTo, bookedDates
                 ) : paymentsEnabled ? (
                   <><CreditCard className="w-4 h-4" /> Оплатити</>
                 ) : (
-                  <><Check className="w-4 h-4" /> Підтвердити бронювання</>
+                  <><Check className="w-4 h-4" /> Надіслати заявку</>
                 )}
               </button>
             </div>

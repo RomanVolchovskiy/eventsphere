@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getDb } from "@/lib/db";
+import { participantWhere } from "@/lib/conversations";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ export async function GET(
   const db = getDb();
 
   const conversation = await db.conversation.findFirst({
-    where: { id, userId: session.user.id },
+    where: { id, ...participantWhere(session.user.id) },
   });
   if (!conversation) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
@@ -46,13 +47,18 @@ export async function POST(
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { text } = await request.json();
-  if (!text?.trim()) return NextResponse.json({ error: "Текст порожній" }, { status: 400 });
+  let text: unknown;
+  try {
+    ({ text } = await request.json());
+  } catch {
+    return NextResponse.json({ error: "Некоректний запит" }, { status: 400 });
+  }
+  if (typeof text !== "string" || !text.trim()) return NextResponse.json({ error: "Текст порожній" }, { status: 400 });
 
   const db = getDb();
 
   const conversation = await db.conversation.findFirst({
-    where: { id, userId: session.user.id },
+    where: { id, ...participantWhere(session.user.id) },
   });
   if (!conversation) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
@@ -60,7 +66,7 @@ export async function POST(
     data: {
       conversationId: id,
       senderId: session.user.id,
-      text: text.trim(),
+      text: text.trim().slice(0, 4000),
     },
     include: { sender: { select: { id: true, name: true } } },
   });

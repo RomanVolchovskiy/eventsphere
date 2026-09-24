@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { getDb } from "@/lib/db";
 import { rateLimit, getClientIp } from "@/lib/ratelimit";
 import { isEventCategory } from "@/lib/categories";
+import { isDemoEmail } from "@/lib/demo";
 
 export async function POST(req: NextRequest) {
   // Rate limit: 5 registrations per IP per 15 minutes
@@ -23,10 +24,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const body = await req.json();
-  const { name, email, password, role, phone, businessName, category, city } = body;
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Некоректний запит" }, { status: 400 });
+  }
+  const { name, password, role, phone, businessName, category, city } = body as Record<string, string>;
+  const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
 
-  if (!name || !email || !password) {
+  if (!name || !email || !password || typeof password !== "string") {
     return NextResponse.json({ error: "Заповніть усі обов'язкові поля" }, { status: 400 });
   }
 
@@ -51,10 +58,17 @@ export async function POST(req: NextRequest) {
   if (!emailRegex.test(email)) {
     return NextResponse.json({ error: "Невірний формат email" }, { status: 400 });
   }
+  // Домен зарезервовано під демо-профілі (src/lib/demo.ts).
+  if (isDemoEmail(email)) {
+    return NextResponse.json({ error: "Цей email не можна використати" }, { status: 400 });
+  }
 
   const db = getDb();
 
-  const existing = await db.user.findUnique({ where: { email } });
+  const existing = await db.user.findFirst({
+    where: { email: { equals: email, mode: "insensitive" } },
+    select: { id: true },
+  });
   if (existing) {
     return NextResponse.json({ error: "Email вже зайнятий" }, { status: 409 });
   }
@@ -71,7 +85,7 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  if (isVendor) {
+  if (isVendor && isEventCategory(category)) {
     await db.vendor.create({
       data: {
         userId: user.id,
