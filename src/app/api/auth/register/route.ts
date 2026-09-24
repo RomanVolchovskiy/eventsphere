@@ -8,7 +8,7 @@ import { isDemoEmail } from "@/lib/demo";
 export async function POST(req: NextRequest) {
   // Rate limit: 5 registrations per IP per 15 minutes
   const ip = getClientIp(req);
-  const rl = rateLimit(`register:${ip}`, 5, 15 * 60 * 1000);
+  const rl = await rateLimit(`register:${ip}`, 5, 15 * 60 * 1000);
 
   if (!rl.success) {
     return NextResponse.json(

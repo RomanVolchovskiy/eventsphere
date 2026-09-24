@@ -58,7 +58,7 @@ function parseInput(body: unknown): { input: MatchInput } | { error: string } {
 
 export async function POST(request: NextRequest) {
   // Ендпоінт публічний і б'є в БД — обмежуємо за IP.
-  const rl = rateLimit(`smart-match:${getClientIp(request)}`, 30, 10 * 60 * 1000);
+  const rl = await rateLimit(`smart-match:${getClientIp(request)}`, 30, 10 * 60 * 1000);
   if (!rl.success) {
     return NextResponse.json(
       { error: "Забагато запитів. Спробуйте за кілька хвилин." },

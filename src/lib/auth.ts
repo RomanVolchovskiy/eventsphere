@@ -55,7 +55,7 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) return null;
 
         // Rate limit: 10 login attempts per email per 15 minutes
-        const rl = rateLimit(
+        const rl = await rateLimit(
           `login:${credentials.email.toLowerCase()}`,
           10,
           15 * 60 * 1000
