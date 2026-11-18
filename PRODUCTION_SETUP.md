@@ -201,9 +201,15 @@ curl -s -b "$J" -o /dev/null -D - -X POST "$U/api/auth/signin/google" \
 (`src/lib/supabase.ts`) прибрано разом із залежністю `@supabase/supabase-js`, щоб не
 тримати два паралельні шляхи до даних.
 
-Rate limiting — власний in-memory лімітер (`src/lib/ratelimit.ts`), лічильник живе в межах
-одного serverless-інстансу. Цього досить проти простого зловживання; для масштабу знадобиться
-спільне сховище (Redis).
+Rate limiting (`src/lib/ratelimit.ts`) працює на **Upstash Redis**: лічильники спільні для всіх
+інстансів Vercel, тож ліміт не множиться на кількість холодних стартів. Ліміти: реєстрація —
+5 за 15 хв на IP, Smart Match — 30 за 10 хв на IP, checkout — 10 за годину на користувача.
+
+Підключення — будь-яка пара змінних: `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`
+(пряме) або `KV_REST_API_URL` / `KV_REST_API_TOKEN` (інтеграція Upstash у Vercel Marketplace).
+Без них, а також коли Redis не відповів за 1 с чи повернув помилку, вмикається запасний
+лімітер у пам'яті одного інстансу — запит не падає, але ліміт стає слабшим. На проді це видно
+в логах: `ratelimit: Upstash Redis не налаштовано` або `fallback на пам'ять`.
 
 ---
 
