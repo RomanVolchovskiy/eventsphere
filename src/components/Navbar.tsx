@@ -87,7 +87,7 @@ export default function Navbar() {
         </span>
       </Link>
 
-      <nav className="nav-links hidden md:flex">
+      <nav className="nav-links">
         {links.map(l => (
           <Link key={l.href} href={l.href}>
             {l.label}
@@ -95,7 +95,7 @@ export default function Navbar() {
         ))}
       </nav>
 
-      <div className="nav-actions hidden md:flex">
+      <div className="nav-actions">
         {status === "loading" ? (
           <div className="w-7 h-7 rounded-full bg-[var(--bg-2)] animate-pulse" />
         ) : session ? (
@@ -185,7 +185,7 @@ export default function Navbar() {
       </div>
 
       <button
-        className="md:hidden text-[var(--ink)] p-2 justify-self-end"
+        className="nav-burger text-[var(--ink)] p-2 justify-self-end"
         onClick={() => setOpen(!open)}
         aria-label="Меню"
       >
@@ -194,7 +194,7 @@ export default function Navbar() {
 
       {open && (
         <div
-          className="md:hidden"
+          className="nav-mobile"
           style={{
             gridColumn: "1 / -1",
             marginTop: 12,

@@ -229,10 +229,16 @@ em {
 .nav-links a:hover { color: var(--bone); }
 .nav-links a:hover::after { transform: scaleX(1); }
 .nav-actions { display: flex; gap: 12px; align-items: center; justify-content: end; }
-/* Нешароване правило вище перебиває Tailwind `hidden` (він у @layer utilities),
-   тож на мобільному ховаємо дії тут — межа = md з Navbar.tsx. Вхід і реєстрація
-   там є в бургер-меню. */
-@media (max-width: 767.98px) { .nav-actions { display: none; } }
+/* Повне меню лише ширше 1100 px — на цій же межі ховаються .nav-links.
+   Вужче — лого + бургер. Тут, а не Tailwind-класами в Navbar.tsx: нешаровані
+   правила вище перебивають `hidden`/`md:flex` з @layer utilities. */
+.nav-burger, .nav-mobile { display: none; }
+@media (max-width: 1100px) {
+  .nav { grid-template-columns: 1fr auto; }
+  .nav-actions { display: none; }
+  .nav-burger { display: inline-flex; }
+  .nav-mobile { display: block; }
+}
 .nav-link { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); padding: 6px 12px; }
 .nav-link:hover { color: var(--bone); }
 
